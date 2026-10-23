@@ -33,16 +33,16 @@ export async function userMiddleware(ctx, next) {
           .eq('telegram_id', telegramId);
       }
     } else {
-      // 2. Create profile for new user
+      // 2. Create profile for new user idempotently
       const { data: newUser } = await supabase
         .from('profiles')
-        .insert([{
+        .upsert([{
           telegram_id: telegramId,
           username,
           first_name: firstName,
           last_name: lastName,
           language_code: 'km'
-        }])
+        }], { onConflict: 'telegram_id' })
         .select()
         .single();
 

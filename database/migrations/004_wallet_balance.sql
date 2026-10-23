@@ -43,15 +43,17 @@ BEGIN
     SELECT * INTO v_profile FROM profiles WHERE telegram_id = p_telegram_id FOR UPDATE;
 
     IF NOT FOUND THEN
-        RETURN jsonb_build_object('success', false, 'error', 'Profile not found');
+        INSERT INTO profiles (telegram_id, balance, first_name)
+        VALUES (p_telegram_id, p_amount, 'Customer')
+        RETURNING * INTO v_profile;
+        v_new_balance := p_amount;
+    ELSE
+        v_new_balance := COALESCE(v_profile.balance, 0.00) + p_amount;
+        UPDATE profiles
+        SET balance = v_new_balance,
+            updated_at = now()
+        WHERE telegram_id = p_telegram_id;
     END IF;
-
-    v_new_balance := COALESCE(v_profile.balance, 0.00) + p_amount;
-
-    UPDATE profiles
-    SET balance = v_new_balance,
-        updated_at = now()
-    WHERE telegram_id = p_telegram_id;
 
     UPDATE balance_transactions
     SET status = 'completed',

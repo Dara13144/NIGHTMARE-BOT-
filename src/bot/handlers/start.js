@@ -26,28 +26,33 @@ export async function handleStart(ctx) {
       await ctx.answerCbQuery();
     } catch {}
 
+    const inlineKb = getMainMenuKeyboard(lang);
+
     // If previous message was a category photo, switch media back to main banner
     if (hasBanner) {
       try {
-        return await ctx.editMessageMedia({
-          type: 'photo',
-          media: { source: BANNER_FILE },
-          caption: text,
-          parse_mode: 'HTML'
-        });
+        return await ctx.editMessageMedia(
+          {
+            type: 'photo',
+            media: { source: BANNER_FILE },
+            caption: text,
+            parse_mode: 'HTML'
+          },
+          inlineKb
+        );
       } catch {}
     }
 
     try {
       return await ctx.editMessageCaption(text, {
         parse_mode: 'HTML',
-        reply_markup: { inline_keyboard: [] }
+        ...inlineKb
       });
     } catch {
       try {
         return await ctx.editMessageText(text, {
           parse_mode: 'HTML',
-          reply_markup: { inline_keyboard: [] }
+          ...inlineKb
         });
       } catch {
         // If message cannot be edited (e.g. from submenus that changed types)
@@ -55,24 +60,25 @@ export async function handleStart(ctx) {
           return await ctx.replyWithPhoto({ source: BANNER_FILE }, {
             caption: text,
             parse_mode: 'HTML',
-            ...getPersistentReplyKeyboard(lang, adminUser)
+            ...inlineKb
           });
         }
         return await ctx.reply(text, {
           parse_mode: 'HTML',
-          ...getPersistentReplyKeyboard(lang, adminUser)
+          ...inlineKb
         });
       }
     }
   }
 
-  // Send banner photo with welcome caption and bottom persistent system menu buttons
+  // Send banner photo with welcome caption and inline menu buttons
+  const inlineKb = getMainMenuKeyboard(lang);
   if (hasBanner) {
     try {
       return await ctx.replyWithPhoto({ source: BANNER_FILE }, {
         caption: text,
         parse_mode: 'HTML',
-        ...getPersistentReplyKeyboard(lang, adminUser)
+        ...inlineKb
       });
     } catch (err) {
       // fallback to regular text reply if photo fails
@@ -81,7 +87,7 @@ export async function handleStart(ctx) {
 
   return ctx.reply(text, {
     parse_mode: 'HTML',
-    ...getPersistentReplyKeyboard(lang, adminUser)
+    ...inlineKb
   });
 }
 

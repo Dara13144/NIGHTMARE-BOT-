@@ -226,7 +226,8 @@ BEGIN
         payment_method = p_payment_method,
         verified_at = now(),
         updated_at = now()
-    WHERE id = p_payment_id;
+    WHERE (p_payment_id IS NOT NULL AND id = p_payment_id)
+       OR (p_payment_id IS NULL AND order_id = p_order_id);
 
     -- Update order to paid
     UPDATE orders

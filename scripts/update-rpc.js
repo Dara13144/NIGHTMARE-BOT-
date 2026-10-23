@@ -123,10 +123,85 @@ async function updateRpc() {
       );
   END;
   $$;
+
+  -- Atomically Finalize Order and Mark Inventory Sold
+  CREATE OR REPLACE FUNCTION finalize_order_payment(
+      p_order_id UUID,
+      p_payment_id UUID,
+      p_transaction_id TEXT,
+      p_payment_method TEXT DEFAULT 'ABA PayWay'
+  )
+  RETURNS JSONB
+  LANGUAGE plpgsql
+  SECURITY DEFINER
+  AS $$
+  DECLARE
+      v_order RECORD;
+      v_item RECORD;
+  BEGIN
+      -- Lock order row
+      SELECT * INTO v_order
+      FROM orders
+      WHERE id = p_order_id
+      FOR UPDATE;
+
+      IF NOT FOUND THEN
+          RETURN jsonb_build_object('success', false, 'error', 'Order not found');
+      END IF;
+
+      -- Check if already finalized (Idempotency)
+      IF v_order.status IN ('paid', 'delivered') THEN
+          RETURN jsonb_build_object('success', true, 'already_processed', true, 'status', v_order.status);
+      END IF;
+
+      -- Mark order items as permanently sold
+      FOR v_item IN SELECT * FROM order_items WHERE order_id = p_order_id LOOP
+          IF v_item.inventory_type = 'account' THEN
+              UPDATE account_inventory
+              SET status = 'sold',
+                  sold_at = now(),
+                  reservation_expires_at = NULL,
+                  updated_at = now()
+              WHERE id = v_item.inventory_item_id;
+          ELSIF v_item.inventory_type = 'code' THEN
+              UPDATE code_inventory
+              SET status = 'sold',
+                  sold_at = now(),
+                  reservation_expires_at = NULL,
+                  updated_at = now()
+              WHERE id = v_item.inventory_item_id;
+          END IF;
+      END LOOP;
+
+      -- Update payment (handles both explicit payment ID and order reference lookup)
+      UPDATE payments
+      SET status = 'paid',
+          transaction_id = p_transaction_id,
+          payment_method = p_payment_method,
+          verified_at = now(),
+          updated_at = now()
+      WHERE (p_payment_id IS NOT NULL AND id = p_payment_id)
+         OR (p_payment_id IS NULL AND order_id = p_order_id);
+
+      -- Update order to paid
+      UPDATE orders
+      SET status = 'paid',
+          paid_at = now(),
+          updated_at = now()
+      WHERE id = p_order_id;
+
+      RETURN jsonb_build_object(
+          'success', true,
+          'already_processed', false,
+          'order_id', p_order_id,
+          'status', 'paid'
+      );
+  END;
+  $$;
   `;
 
   await client.query(sql);
-  console.log('Successfully updated reserve_product_inventory RPC on Supabase!');
+  console.log('Successfully updated reserve_product_inventory and finalize_order_payment RPCs on Supabase!');
   await client.end();
 }
 
