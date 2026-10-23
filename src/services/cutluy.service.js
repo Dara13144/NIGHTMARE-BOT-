@@ -38,7 +38,8 @@ export class CutluyService {
           'Content-Type': 'application/json',
           'User-Agent': 'NightmareStore/1.0'
         },
-        body: JSON.stringify(payload)
+        body: JSON.stringify(payload),
+        signal: AbortSignal.timeout(6000)
       });
 
       if (response.ok) {
@@ -128,7 +129,8 @@ export class CutluyService {
         headers: {
           Authorization: `Bearer ${env.CUTLUY_API_KEY}`,
           'User-Agent': 'NightmareStore/1.0'
-        }
+        },
+        signal: AbortSignal.timeout(5000)
       });
 
       if (!response.ok) return null;
