@@ -96,7 +96,10 @@ export function getProductDetailKeyboard(productId, isInStock, lang = 'km', isAd
     buttons.push([{ text: '⚡ ' + t(lang, 'btn_buy_now') + ' ($)', callback_data: `buy_prod_${productId}`, style: 'success' }]);
   }
   if (isAdmin) {
-    buttons.push([{ text: '🛠️ Edit This Product (Admin)', callback_data: `admin_edit_prod_${productId}`, style: 'danger' }]);
+    buttons.push([
+      { text: '🛠️ Edit Product (Admin)', callback_data: `admin_edit_prod_${productId}`, style: 'danger' },
+      { text: '🗑️ Delete Product', callback_data: `admin_delete_prod_prompt_${productId}`, style: 'danger' }
+    ]);
   }
   buttons.push([
     { text: '⬅️ Back to Products', callback_data: 'menu_products', style: 'success' },

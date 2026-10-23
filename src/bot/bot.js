@@ -35,6 +35,7 @@ import {
   handleAdminToggleProduct,
   handleAdminPromptDeleteProduct,
   handleAdminConfirmDeleteProduct,
+  handleAdminDeleteProductMenu,
   handleAdminAddCodeMenu,
   handleAdminAddAccountMenu,
   handleAdminPromptCodeInput,
@@ -100,9 +101,11 @@ export function createBot() {
   bot.action(/^admin_edit_price_([a-zA-Z0-9\-]+)$/, (ctx) => handleAdminPromptEditPrice(ctx, ctx.match[1]));
   bot.action(/^admin_edit_title_([a-zA-Z0-9\-]+)$/, (ctx) => handleAdminPromptEditTitle(ctx, ctx.match[1]));
   bot.action(/^admin_edit_desc_([a-zA-Z0-9\-]+)$/, (ctx) => handleAdminPromptEditDesc(ctx, ctx.match[1]));
-  bot.action(/^admin_toggle_prod_([a-zA-Z0-9\-]+)$/, (ctx) => handleAdminToggleProduct(ctx, ctx.match[1]));
-  bot.action(/^admin_delete_prod_prompt_([a-zA-Z0-9\-]+)$/, (ctx) => handleAdminPromptDeleteProduct(ctx, ctx.match[1]));
-  bot.action(/^admin_delete_prod_confirm_([a-zA-Z0-9\-]+)$/, (ctx) => handleAdminConfirmDeleteProduct(ctx, ctx.match[1]));
+  bot.action(/^admin_toggle_prod_([a-zA-Z0-9_\-]+)$/, (ctx) => handleAdminToggleProduct(ctx, ctx.match[1]));
+  bot.action('admin_delete_products_menu', (ctx) => handleAdminDeleteProductMenu(ctx, 1));
+  bot.action(/^admin_delete_page_(\d+)$/, (ctx) => handleAdminDeleteProductMenu(ctx, parseInt(ctx.match[1], 10)));
+  bot.action(/^admin_delete_prod_prompt_([a-zA-Z0-9_\-]+)$/, (ctx) => handleAdminPromptDeleteProduct(ctx, ctx.match[1]));
+  bot.action(/^admin_delete_prod_confirm_([a-zA-Z0-9_\-]+)$/, (ctx) => handleAdminConfirmDeleteProduct(ctx, ctx.match[1]));
   bot.action('admin_add_code_menu', handleAdminAddCodeMenu);
   bot.action('admin_add_account_menu', handleAdminAddAccountMenu);
   bot.action(/^admin_prompt_code_([a-zA-Z0-9\-]+)$/, (ctx) => handleAdminPromptCodeInput(ctx, ctx.match[1]));

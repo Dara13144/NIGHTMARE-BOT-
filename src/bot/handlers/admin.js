@@ -91,21 +91,22 @@ export async function handleAdminDashboard(ctx) {
     const actionRows = [
       [
         Markup.button.callback('🛠️ Product Editor', 'admin_edit_products_menu'),
-        Markup.button.callback('📦 Stock Report', 'admin_stock')
+        Markup.button.callback('🗑️ Delete Products', 'admin_delete_products_menu')
       ],
       [
         Markup.button.callback('➕ Add Rockstar Code', 'admin_add_code_menu'),
         Markup.button.callback('➕ Add Rockstar Account', 'admin_add_account_menu')
       ],
       [
-        Markup.button.callback('📊 Detailed Stats', 'admin_stats'),
+        Markup.button.callback('📦 Stock Report', 'admin_stock'),
         Markup.button.callback('👥 Buyers List', 'admin_buyers')
       ],
       [
         Markup.button.callback('💳 Recent Orders', 'admin_orders'),
-        Markup.button.callback('💰 Adjust Balance Guide', 'admin_balance_help')
+        Markup.button.callback('📊 Detailed Stats', 'admin_stats')
       ],
       [
+        Markup.button.callback('💰 Adjust Balance Guide', 'admin_balance_help'),
         Markup.button.callback('📢 Broadcast Help', 'admin_broadcast_help')
       ]
     ];
@@ -736,6 +737,73 @@ export async function handleAdminPromptDeleteProduct(ctx, productId) {
     return await ctx.reply(text, { parse_mode: 'HTML', ...keyboard });
   } catch (err) {
     return ctx.reply(`❌ Error preparing delete confirmation: ${escapeHtml(err.message)}`);
+  }
+}
+
+/**
+ * Dedicated Delete Products Menu for Admin Dashboard
+ */
+export async function handleAdminDeleteProductMenu(ctx, page = 1) {
+  if (ctx.callbackQuery) {
+    try { await ctx.answerCbQuery(); } catch {}
+  }
+  const telegramId = ctx.from?.id;
+  if (!isAdmin(telegramId)) return;
+
+  try {
+    const products = await ProductService.getProducts();
+
+    if (!products || products.length === 0) {
+      return ctx.reply('ℹ️ No products currently found in the store.');
+    }
+
+    const pageSize = 5;
+    const totalPages = Math.ceil(products.length / pageSize);
+    const startIdx = (page - 1) * pageSize;
+    const currentBatch = products.slice(startIdx, startIdx + pageSize);
+
+    const text = `🗑️ <b>ADMIN DELETE PRODUCT CONTROL PANEL</b>\n\n` +
+      `Select any product below to permanently delete it from NIGHTMARE STORE.\n` +
+      `<i>(Page ${page} of ${totalPages} • Total: ${products.length} products)</i>\n\n` +
+      `⚠️ <i>Deleting a product will safely clean up its inventory and preserve customer purchase history.</i>`;
+
+    const buttons = [];
+    for (const prod of currentBatch) {
+      buttons.push([
+        Markup.button.callback(`🗑️ Delete: ${prod.title} ($${Number(prod.price).toFixed(2)})`, `admin_delete_prod_prompt_${prod.id}`)
+      ]);
+    }
+
+    const navRow = [];
+    if (page > 1) {
+      navRow.push(Markup.button.callback('⬅️ Prev', `admin_delete_page_${page - 1}`));
+    }
+    if (startIdx + pageSize < products.length) {
+      navRow.push(Markup.button.callback('Next ➡️', `admin_delete_page_${page + 1}`));
+    }
+    if (navRow.length > 0) {
+      buttons.push(navRow);
+    }
+
+    buttons.push([
+      Markup.button.callback('🛠️ Product Editor', 'admin_edit_products_menu'),
+      Markup.button.callback('🛡️ Admin Panel', 'menu_admin')
+    ]);
+
+    const keyboard = Markup.inlineKeyboard(buttons);
+
+    if (ctx.callbackQuery) {
+      try {
+        return await ctx.editMessageText(text, { parse_mode: 'HTML', ...keyboard });
+      } catch {
+        return await ctx.reply(text, { parse_mode: 'HTML', ...keyboard });
+      }
+    }
+
+    return await ctx.reply(text, { parse_mode: 'HTML', ...keyboard });
+  } catch (err) {
+    logger.error({ err }, 'Error opening delete product menu');
+    return ctx.reply(`❌ Could not load products: ${escapeHtml(err.message)}`);
   }
 }
 
@@ -1501,10 +1569,7 @@ export async function handleDeleteProductCommand(ctx) {
 
   const parts = ctx.message.text.trim().split(/\s+/);
   if (parts.length < 2) {
-    return ctx.reply(
-      `ℹ️ <b>Delete Product Usage:</b>\n<code>/deleteproduct &lt;product_id&gt;</code>\n\nExample:\n<code>/deleteproduct prod-01</code>`,
-      { parse_mode: 'HTML' }
-    );
+    return handleAdminDeleteProductMenu(ctx, 1);
   }
 
   const productId = parts[1];

@@ -151,14 +151,24 @@ export class ProductService {
   }
 
   /**
-   * Delete product
+   * Delete product cleanly cascading inventory and nullifying order_items
    */
   static async deleteProduct(id) {
+    // 1. Delete associated inventory items (codes and accounts)
+    await supabase.from('code_inventory').delete().eq('product_id', id);
+    await supabase.from('account_inventory').delete().eq('product_id', id);
+
+    // 2. Set product_id to NULL on existing order items so historical orders remain intact
+    await supabase.from('order_items').update({ product_id: null }).eq('product_id', id);
+
+    // 3. Delete the product row
     const { error } = await supabase.from('products').delete().eq('id', id);
     if (error) {
       logger.error({ error, id }, 'Failed to delete product');
       throw new Error(`Failed to delete product: ${error.message}`);
     }
+
+    logger.info({ id }, 'Product permanently deleted successfully');
     return true;
   }
 }
