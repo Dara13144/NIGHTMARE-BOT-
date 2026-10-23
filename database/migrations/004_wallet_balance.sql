@@ -14,6 +14,7 @@ CREATE TABLE IF NOT EXISTS balance_transactions (
     reference_id TEXT UNIQUE NOT NULL,
     status TEXT NOT NULL DEFAULT 'pending' CHECK (status IN ('pending', 'completed', 'failed', 'cancelled')),
     checkout_url TEXT,
+    payment_id TEXT,
     qr_string TEXT,
     notes TEXT,
     created_at TIMESTAMPTZ DEFAULT now(),

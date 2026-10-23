@@ -74,20 +74,21 @@ describe('Telegram Bot UI & Security', () => {
     const { handleAddCodeCommand, handleAddAccountCommand, handleBulkCodesCommand } = await import('../src/bot/handlers/admin.js');
 
     let replyMessage = '';
+    const uid = Date.now();
     const mockCtx = {
       from: { id: 8361673413, first_name: 'Admin' },
-      message: { text: '/addcode prod-01 ROCK-TEST-9988-7766' },
+      message: { text: `/addcode prod-01 ROCK-${uid}-CODE` },
       reply: (text) => { replyMessage = text; return Promise.resolve({ text }); }
     };
 
     await handleAddCodeCommand(mockCtx);
     expect(replyMessage).toContain('Code Added Successfully');
 
-    mockCtx.message.text = '/bulkcodes prod-01 BULK-111, BULK-222, BULK-333';
+    mockCtx.message.text = `/bulkcodes prod-01 BULK-A-${uid}, BULK-B-${uid}`;
     await handleBulkCodesCommand(mockCtx);
     expect(replyMessage).toContain('Bulk Import Complete');
 
-    mockCtx.message.text = '/addaccount prod-03 gta_user@test.com SuperSecretPass123!';
+    mockCtx.message.text = `/addaccount prod-03 user_${uid}@test.com SuperSecretPass123!`;
     await handleAddAccountCommand(mockCtx);
     expect(replyMessage).toContain('Rockstar Account Added Successfully');
   });
