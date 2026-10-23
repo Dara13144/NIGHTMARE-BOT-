@@ -32,7 +32,16 @@ import { logger } from '../utils/logger.js';
 export function registerBotCommands(bot) {
   // 1. Slash Commands Registration
   bot.command('start', handleStart);
-  bot.command(['buy', 'shop', 'products'], (ctx) => handleProducts(ctx, 'all', 1));
+  bot.command(['buy', 'shop', 'products'], async (ctx) => {
+    const raw = ctx.message?.text?.trim() || '';
+    const parts = raw.split(/\s+/);
+    if (parts.length > 1 && parts[1]) {
+      const prodId = parts[1];
+      const { handleBuyProduct } = await import('./handlers/checkout.js');
+      return handleBuyProduct(ctx, prodId);
+    }
+    return handleProducts(ctx, 'all', 1);
+  });
   bot.command('accounts', handleAccounts);
   bot.command('codes', handleCodes);
   bot.command('stock', handleStockStatus);

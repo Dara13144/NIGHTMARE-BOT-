@@ -4,7 +4,7 @@
 -- 1. Reserve Product Inventory Atomically
 CREATE OR REPLACE FUNCTION reserve_product_inventory(
     p_order_id UUID,
-    p_product_id UUID,
+    p_product_id TEXT,
     p_inventory_type TEXT,
     p_duration_minutes INT DEFAULT 15
 )

@@ -7,7 +7,7 @@ import { handleProducts, handleViewProduct, handleStockStatus } from './handlers
 import { handleAccounts } from './handlers/accounts.js';
 import { handleCodes } from './handlers/codes.js';
 import { handleBuyProduct, handleCheckPaymentStatus, handleAutoPayOrder, handleCancelOrder } from './handlers/checkout.js';
-import { handleOrders } from './handlers/orders.js';
+import { handleOrders, handleViewDelivery } from './handlers/orders.js';
 import { handleProfile } from './handlers/profile.js';
 import {
   handleWalletMenu,
@@ -134,31 +134,31 @@ export function createBot() {
   });
 
   // 5. View Product Detail Pattern
-  bot.action(/^view_prod_([a-f0-9\-]+)$/, (ctx) => {
+  bot.action(/^view_prod_([a-zA-Z0-9_\-]+)$/, (ctx) => {
     const productId = ctx.match[1];
     return handleViewProduct(ctx, productId);
   });
 
   // 6. Buy Product Pattern
-  bot.action(/^buy_prod_([a-f0-9\-]+)$/, (ctx) => {
+  bot.action(/^buy_prod_([a-zA-Z0-9_\-]+)$/, (ctx) => {
     const productId = ctx.match[1];
     return handleBuyProduct(ctx, productId);
   });
 
   // 7. Check Payment Status Pattern
-  bot.action(/^check_pay_([a-f0-9\-]+)$/, (ctx) => {
+  bot.action(/^check_pay_([a-zA-Z0-9_\-]+)$/, (ctx) => {
     const orderId = ctx.match[1];
     return handleCheckPaymentStatus(ctx, orderId);
   });
 
   // 7b. Auto-Confirm Product Order Payment Pattern
-  bot.action(/^auto_pay_order_([a-f0-9\-]+)$/, (ctx) => {
+  bot.action(/^auto_pay_order_([a-zA-Z0-9_\-]+)$/, (ctx) => {
     const orderId = ctx.match[1];
     return handleAutoPayOrder(ctx, orderId);
   });
 
   // 8. Cancel Order Pattern
-  bot.action(/^cancel_order_([a-f0-9\-]+)$/, (ctx) => {
+  bot.action(/^cancel_order_([a-zA-Z0-9_\-]+)$/, (ctx) => {
     const orderId = ctx.match[1];
     return handleCancelOrder(ctx, orderId);
   });
@@ -174,21 +174,27 @@ export function createBot() {
   bot.action('cancel_custom_topup', handleCancelCustomTopup);
 
   // 10. Check Top-up Status Pattern
-  bot.action(/^check_topup_([a-zA-Z0-9\-]+)$/, (ctx) => {
+  bot.action(/^check_topup_([a-zA-Z0-9_\-]+)$/, (ctx) => {
     const topupRef = ctx.match[1];
     return handleCheckTopup(ctx, topupRef);
   });
 
   // 10b. Auto-Confirm Top-up Pattern
-  bot.action(/^auto_pay_topup_([a-zA-Z0-9\-]+)$/, (ctx) => {
+  bot.action(/^auto_pay_topup_([a-zA-Z0-9_\-]+)$/, (ctx) => {
     const topupRef = ctx.match[1];
     return handleAutoPayTopup(ctx, topupRef);
   });
 
   // 11. Instant Pay with Wallet Balance Pattern
-  bot.action(/^pay_wallet_([a-f0-9\-]+)$/, (ctx) => {
+  bot.action(/^pay_wallet_([a-zA-Z0-9_\-]+)$/, (ctx) => {
     const orderId = ctx.match[1];
     return handlePayWithWallet(ctx, orderId);
+  });
+
+  // 12. View Delivered Credentials / Activation Keys Pattern
+  bot.action(/^view_delivery_([a-zA-Z0-9_\-]+)$/, (ctx) => {
+    const orderId = ctx.match[1];
+    return handleViewDelivery(ctx, orderId);
   });
 
   // Global Error Handler
