@@ -21,6 +21,9 @@ async function bootstrap() {
     // Setup Bot Launch (Webhook in Production, Polling in Local Development)
     const isProd = env.NODE_ENV === 'production' || (env.APP_BASE_URL && env.APP_BASE_URL.startsWith('https://'));
 
+    let isShuttingDown = false;
+    let reconnectTimeout = null;
+
     if (isProd) {
       try {
         const webhookUrl = `${env.APP_BASE_URL}/webhook/telegram`;
@@ -32,16 +35,25 @@ async function bootstrap() {
         logger.error({ err: err.message }, 'Failed to set Telegram webhook in production mode');
       }
     } else {
-      // Local development polling
-      try {
-        await bot.telegram.deleteWebhook({ drop_pending_updates: true });
-        bot.launch().catch(err => {
-          logger.warn({ err: err.message }, 'Bot polling error. Webhook handler remains active.');
-        });
-        logger.info('🤖 NIGHTMARE STORE Telegram Bot is LIVE and listening for updates');
-      } catch (err) {
-        logger.warn({ err: err.message }, 'Telegram bot initialization skipped (development mock mode)');
-      }
+      // Local development polling with auto-reconnect engine
+      const launchBotPolling = async (attempt = 1) => {
+        if (isShuttingDown) return;
+        try {
+          await bot.telegram.deleteWebhook({ drop_pending_updates: true });
+          logger.info({ attempt }, '🤖 Launching NIGHTMARE STORE Telegram Bot polling...');
+          await bot.launch({ dropPendingUpdates: true });
+          logger.info('🤖 NIGHTMARE STORE Telegram Bot is LIVE and listening for updates');
+        } catch (err) {
+          logger.warn({ err: err.message, attempt }, 'Telegram bot polling interrupted or conflict encountered. Reconnecting in 3s...');
+          if (!isShuttingDown) {
+            reconnectTimeout = setTimeout(() => {
+              launchBotPolling(attempt + 1);
+            }, 3000);
+          }
+        }
+      };
+
+      launchBotPolling();
     }
   });
 
@@ -69,6 +81,8 @@ async function bootstrap() {
   // 5. Graceful Shutdown
   const shutdown = (signal) => {
     logger.info({ signal }, 'Graceful shutdown initiated');
+    isShuttingDown = true;
+    if (reconnectTimeout) clearTimeout(reconnectTimeout);
     AutoPaymentService.stop();
     clearInterval(cleanupInterval);
     server.close(() => {
