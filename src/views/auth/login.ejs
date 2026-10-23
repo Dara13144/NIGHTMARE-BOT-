@@ -1,0 +1,67 @@
+<%- include('../layouts/header', { title: 'Admin Login', currentPath: '/admin/login' }) %>
+
+<div class="flex items-center justify-center min-h-screen px-4 py-12">
+  <div class="max-w-md w-full bg-nightmare-dark border border-nightmare-border rounded-2xl p-8 shadow-2xl relative overflow-hidden">
+    <!-- Glow effect -->
+    <div class="absolute -top-24 -left-24 w-48 h-48 bg-red-600/10 rounded-full blur-3xl pointer-events-none"></div>
+    <div class="absolute -bottom-24 -right-24 w-48 h-48 bg-red-800/10 rounded-full blur-3xl pointer-events-none"></div>
+
+    <div class="text-center mb-8 relative z-10">
+      <div class="w-14 h-14 bg-red-950 border border-red-700/80 rounded-xl flex items-center justify-center mx-auto mb-3 shadow-lg shadow-red-950">
+        <span class="text-2xl font-black text-red-500">NM</span>
+      </div>
+      <h2 class="text-2xl font-black text-white tracking-wider uppercase">NIGHTMARE STORE</h2>
+      <p class="text-xs text-gray-400 mt-1 uppercase tracking-widest font-mono">Administration Portal</p>
+    </div>
+
+    <% if (locals.error) { %>
+      <div class="mb-5 p-3 rounded-lg bg-red-950/60 border border-red-800/80 text-red-300 text-xs flex items-center space-x-2">
+        <span>⚠️</span>
+        <span><%= error %></span>
+      </div>
+    <% } %>
+
+    <form action="/admin/login" method="POST" class="space-y-5 relative z-10">
+      <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+
+      <div>
+        <label for="username" class="block text-xs font-semibold text-gray-300 uppercase tracking-wider mb-2">Username</label>
+        <input
+          type="text"
+          id="username"
+          name="username"
+          required
+          autocomplete="username"
+          placeholder="admin"
+          class="w-full px-4 py-2.5 bg-nightmare-card border border-nightmare-border rounded-lg text-sm text-white placeholder-gray-600 focus:outline-none focus:border-red-600 focus:ring-1 focus:ring-red-600 transition"
+        >
+      </div>
+
+      <div>
+        <label for="password" class="block text-xs font-semibold text-gray-300 uppercase tracking-wider mb-2">Password</label>
+        <input
+          type="password"
+          id="password"
+          name="password"
+          required
+          autocomplete="current-password"
+          placeholder="••••••••••••"
+          class="w-full px-4 py-2.5 bg-nightmare-card border border-nightmare-border rounded-lg text-sm text-white placeholder-gray-600 focus:outline-none focus:border-red-600 focus:ring-1 focus:ring-red-600 transition"
+        >
+      </div>
+
+      <button
+        type="submit"
+        class="w-full bg-red-700 hover:bg-red-800 text-white font-bold py-2.5 px-4 rounded-lg text-sm uppercase tracking-wider transition duration-150 shadow-lg shadow-red-950/50 hover:shadow-red-900/50 cursor-pointer"
+      >
+        Sign In to Portal
+      </button>
+
+      <p class="text-[11px] text-gray-500 text-center mt-4">
+        🔒 Protected by rate limiting and encrypted audit logging.
+      </p>
+    </form>
+  </div>
+</div>
+
+<%- include('../layouts/footer') %>

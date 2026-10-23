@@ -1,0 +1,134 @@
+<%- include('../layouts/header', { title: 'Dashboard Overview', currentPath: '/admin' }) %>
+
+<div class="space-y-8">
+  <!-- Top Bar -->
+  <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+    <div>
+      <h2 class="text-2xl font-black text-white tracking-wide">STORE OVERVIEW</h2>
+      <p class="text-xs text-gray-400 mt-1">Real-time telemetry and order execution metrics</p>
+    </div>
+    <div class="flex items-center space-x-3">
+      <a href="/admin/products" class="bg-red-700 hover:bg-red-800 text-white text-xs font-bold uppercase tracking-wider px-4 py-2 rounded-lg transition shadow-md shadow-red-950 flex items-center space-x-2">
+        <span>+</span> <span>New Product</span>
+      </a>
+      <a href="/admin/inventory/codes" class="bg-nightmare-card hover:bg-nightmare-border text-gray-200 border border-nightmare-border text-xs font-semibold px-4 py-2 rounded-lg transition flex items-center space-x-2">
+        <span>⚡ Import Codes</span>
+      </a>
+    </div>
+  </div>
+
+  <!-- KPI Cards Grid -->
+  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
+    <!-- Verified Revenue -->
+    <div class="bg-nightmare-card border border-nightmare-border rounded-xl p-5 shadow-lg relative overflow-hidden">
+      <div class="text-[11px] font-bold text-gray-400 uppercase tracking-wider">Verified Revenue</div>
+      <div class="text-2xl font-black text-emerald-400 mt-2">$<%= stats.verifiedRevenue.toFixed(2) %></div>
+      <div class="text-[10px] text-gray-500 mt-1">Confirmed ABA PayWay</div>
+    </div>
+
+    <!-- Pending Payments -->
+    <div class="bg-nightmare-card border border-nightmare-border rounded-xl p-5 shadow-lg">
+      <div class="text-[11px] font-bold text-gray-400 uppercase tracking-wider">Pending Payments</div>
+      <div class="text-2xl font-black text-amber-400 mt-2"><%= stats.pendingPayments %></div>
+      <div class="text-[10px] text-gray-500 mt-1">Awaiting customer payment</div>
+    </div>
+
+    <!-- Successful Orders -->
+    <div class="bg-nightmare-card border border-nightmare-border rounded-xl p-5 shadow-lg">
+      <div class="text-[11px] font-bold text-gray-400 uppercase tracking-wider">Successful Orders</div>
+      <div class="text-2xl font-black text-blue-400 mt-2"><%= stats.successfulOrders %></div>
+      <div class="text-[10px] text-gray-500 mt-1">Delivered to Telegram</div>
+    </div>
+
+    <!-- Failed Deliveries -->
+    <div class="bg-nightmare-card border border-red-900/60 rounded-xl p-5 shadow-lg bg-red-950/20">
+      <div class="text-[11px] font-bold text-red-400 uppercase tracking-wider">Delivery Failures</div>
+      <div class="text-2xl font-black text-red-500 mt-2"><%= stats.failedDeliveries %></div>
+      <div class="text-[10px] text-red-400 mt-1">Action required</div>
+    </div>
+
+    <!-- Available Stock -->
+    <div class="bg-nightmare-card border border-nightmare-border rounded-xl p-5 shadow-lg">
+      <div class="text-[11px] font-bold text-gray-400 uppercase tracking-wider">Available Stock</div>
+      <div class="text-2xl font-black text-purple-400 mt-2"><%= stats.availableStock %></div>
+      <div class="text-[10px] text-gray-500 mt-1">Live active units</div>
+    </div>
+
+    <!-- Sold Inventory -->
+    <div class="bg-nightmare-card border border-nightmare-border rounded-xl p-5 shadow-lg">
+      <div class="text-[11px] font-bold text-gray-400 uppercase tracking-wider">Sold Units</div>
+      <div class="text-2xl font-black text-gray-200 mt-2"><%= stats.soldStock %></div>
+      <div class="text-[10px] text-gray-500 mt-1">Total items fulfilled</div>
+    </div>
+  </div>
+
+  <!-- Recent Orders Table -->
+  <div class="bg-nightmare-card border border-nightmare-border rounded-xl shadow-xl overflow-hidden">
+    <div class="p-5 border-b border-nightmare-border flex items-center justify-between">
+      <h3 class="text-base font-bold text-white tracking-wide flex items-center space-x-2">
+        <span>📦</span> <span>Recent Store Orders</span>
+      </h3>
+      <a href="/admin/orders" class="text-xs text-red-400 hover:text-red-300 transition">View all orders &rarr;</a>
+    </div>
+
+    <div class="overflow-x-auto">
+      <table class="w-full text-left text-sm text-gray-300">
+        <thead class="bg-nightmare-dark text-[11px] uppercase tracking-wider text-gray-400 border-b border-nightmare-border font-semibold">
+          <tr>
+            <th class="px-5 py-3.5">Order Ref</th>
+            <th class="px-5 py-3.5">Customer (TG)</th>
+            <th class="px-5 py-3.5">Total ($)</th>
+            <th class="px-5 py-3.5">Status</th>
+            <th class="px-5 py-3.5">Created At</th>
+            <th class="px-5 py-3.5 text-right">Actions</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-nightmare-border/60">
+          <% if (recentOrders.length === 0) { %>
+            <tr>
+              <td colspan="6" class="px-5 py-8 text-center text-gray-500 text-sm">
+                No orders recorded yet. Bot orders will show here in real-time.
+              </td>
+            </tr>
+          <% } %>
+          <% recentOrders.forEach(order => { %>
+            <tr class="hover:bg-nightmare-dark/50 transition">
+              <td class="px-5 py-4 font-mono font-bold text-white text-xs">
+                <%= order.order_number %>
+              </td>
+              <td class="px-5 py-4">
+                <span class="font-mono text-xs text-gray-400"><%= order.telegram_id %></span>
+              </td>
+              <td class="px-5 py-4 font-semibold text-white">
+                $<%= Number(order.total_amount).toFixed(2) %>
+              </td>
+              <td class="px-5 py-4">
+                <% if (order.status === 'delivered') { %>
+                  <span class="px-2.5 py-1 text-[11px] font-bold rounded-full bg-emerald-950 text-emerald-400 border border-emerald-800">Delivered</span>
+                <% } else if (order.status === 'paid') { %>
+                  <span class="px-2.5 py-1 text-[11px] font-bold rounded-full bg-blue-950 text-blue-400 border border-blue-800">Paid</span>
+                <% } else if (order.status === 'delivery_failed') { %>
+                  <span class="px-2.5 py-1 text-[11px] font-bold rounded-full bg-red-950 text-red-400 border border-red-800">Delivery Failed</span>
+                <% } else if (order.status === 'pending') { %>
+                  <span class="px-2.5 py-1 text-[11px] font-bold rounded-full bg-amber-950 text-amber-400 border border-amber-800">Pending</span>
+                <% } else { %>
+                  <span class="px-2.5 py-1 text-[11px] font-bold rounded-full bg-gray-900 text-gray-400 border border-gray-700"><%= order.status %></span>
+                <% } %>
+              </td>
+              <td class="px-5 py-4 text-xs text-gray-400">
+                <%= new Date(order.created_at).toLocaleString() %>
+              </td>
+              <td class="px-5 py-4 text-right">
+                <a href="/admin/orders/<%= order.id %>" class="text-xs text-red-400 hover:text-red-300 font-semibold transition">
+                  Details
+                </a>
+              </td>
+            </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<%- include('../layouts/footer') %>

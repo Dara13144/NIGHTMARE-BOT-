@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NIGHTMARE STORE — Premium Rockstar Games Shop & ABA KHQR</title>
+  <meta name="description" content="Authorized digital store for Rockstar Games activation keys, transferable accounts, and instant Telegram delivery with ABA KHQR & Bakong payment.">
+  
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500;700&family=Plus+Jakarta+Sans:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+  
+  <!-- Stylesheet -->
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+
+  <!-- Top Sticky Navigation Bar -->
+  <nav class="navbar" id="topNav">
+    <div class="nav-container">
+      <a href="/" class="brand-logo">
+        <div class="logo-badge">NM</div>
+        <div class="brand-text">
+          <span class="brand-title">NIGHTMARE STORE</span>
+          <span class="brand-tag">Rockstar Games &bull; ABA KHQR</span>
+        </div>
+      </a>
+
+      <ul class="nav-links">
+        <li><a class="nav-link" href="#productsSection">Products</a></li>
+        <li><a class="nav-link" href="#bannersSection">Categories</a></li>
+        <li><a class="nav-link" onclick="openTopupModal(5)">Top-up Balance</a></li>
+        <li><a class="nav-link" href="https://t.me/darastore_bot" target="_blank">Telegram Bot</a></li>
+      </ul>
+
+      <div class="nav-actions">
+        <button class="btn btn-primary" onclick="openTopupModal(5)">
+          <span>💳 Top-up ABA KHQR</span>
+        </button>
+        <a href="/admin/login" class="btn btn-outline-admin">
+          <span>Admin</span>
+        </a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Hero Section -->
+  <header class="hero-section">
+    <div class="status-pill">
+      <span class="live-dot"></span>
+      <span>AUTOMATED TELEGRAM BOT &bull; ABA KHQR ONLINE</span>
+    </div>
+
+    <h1 class="hero-title">
+      PREMIUM DIGITAL STORE<br>
+      <span>GENUINE ROCKSTAR ASSETS</span>
+    </h1>
+
+    <p class="hero-subtitle">
+      Instant digital delivery of official Rockstar Games activation keys and clean, full-access accounts. 
+      Scan with <b>ABA Mobile</b>, <b>Bakong</b>, or any banking app to receive instant credentials.
+    </p>
+
+    <div class="hero-actions">
+      <a href="#productsSection" class="btn btn-primary" style="padding: 0.8rem 1.6rem; font-size: 0.95rem;">
+        <span>🛍️ Explore Products</span>
+      </a>
+      <button class="btn btn-khqr" onclick="openTopupModal(10)" style="padding: 0.8rem 1.6rem; font-size: 0.95rem;">
+        <span>⚡ Top-up with ABA KHQR</span>
+      </button>
+      <a href="https://t.me/darastore_bot" target="_blank" class="btn btn-secondary" style="padding: 0.8rem 1.4rem; font-size: 0.95rem;">
+        <span>🤖 Open Bot (@darastore_bot)</span>
+      </a>
+    </div>
+
+    <!-- Feature Ribbon -->
+    <div class="feature-ribbon">
+      <div class="feature-item">
+        <div class="feature-icon">⚡</div>
+        <div>
+          <h4>Instant 5s Delivery</h4>
+          <p>Delivered directly to Telegram</p>
+        </div>
+      </div>
+      <div class="feature-item">
+        <div class="feature-icon">🇰🇭</div>
+        <div>
+          <h4>ABA PAY &amp; Bakong</h4>
+          <p>Zero fees EMVCo KHQR scan</p>
+        </div>
+      </div>
+      <div class="feature-item">
+        <div class="feature-icon">🔒</div>
+        <div>
+          <h4>100% Genuine</h4>
+          <p>Full email access &amp; warranty</p>
+        </div>
+      </div>
+      <div class="feature-item">
+        <div class="feature-icon">🤖</div>
+        <div>
+          <h4>24/7 Automation</h4>
+          <p>Real-time bank verification</p>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Featured Banners Section -->
+  <section class="banners-section" id="bannersSection">
+    <div class="banners-grid">
+      <!-- Rockstar Codes Banner -->
+      <div class="banner-card" onclick="document.querySelector('[data-filter=\'rockstar_code\']').click(); document.getElementById('productsSection').scrollIntoView({ behavior: 'smooth' });">
+        <img src="/images/rockstar-codes-banner.jpg" alt="Rockstar Codes" class="banner-img">
+        <div class="banner-overlay">
+          <span class="banner-tag">Official Keys</span>
+          <h3 class="banner-title">Rockstar Activation Codes</h3>
+          <p class="banner-desc">Global digital keys for GTA V, RDR 2, and Rockstar Games Launcher.</p>
+          <div>
+            <span class="btn btn-primary" style="padding: 0.4rem 0.9rem; font-size: 0.75rem;">View Codes &rarr;</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Rockstar Accounts Banner -->
+      <div class="banner-card" onclick="document.querySelector('[data-filter=\'rockstar_account\']').click(); document.getElementById('productsSection').scrollIntoView({ behavior: 'smooth' });">
+        <img src="/images/rockstar-accounts-banner.jpg" alt="Rockstar Accounts" class="banner-img">
+        <div class="banner-overlay">
+          <span class="banner-tag">Clean Accounts</span>
+          <h3 class="banner-title">Rockstar Full-Access Accounts</h3>
+          <p class="banner-desc">Transferable email &amp; password accounts ready for GTA Online &amp; FiveM.</p>
+          <div>
+            <span class="btn btn-primary" style="padding: 0.4rem 0.9rem; font-size: 0.75rem;">View Accounts &rarr;</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Live Product Catalog Section -->
+  <section class="catalog-section" id="productsSection">
+    <div class="catalog-header">
+      <div>
+        <h2 class="section-title">Available Inventory</h2>
+        <p class="section-subtitle">Real-time stock with instant ABA KHQR checkout</p>
+      </div>
+
+      <!-- Category Filter Tabs -->
+      <div class="filter-tabs">
+        <button class="filter-tab active" data-filter="all">🔥 All Products</button>
+        <button class="filter-tab" data-filter="rockstar_code">🔑 Rockstar Codes</button>
+        <button class="filter-tab" data-filter="rockstar_account">🎮 Rockstar Accounts</button>
+      </div>
+    </div>
+
+    <!-- Products Dynamic Grid -->
+    <div class="products-grid" id="productsGrid">
+      <!-- Injected dynamically via app.js -->
+    </div>
+  </section>
+
+  <!-- Order / Payment Lookup Widget -->
+  <section style="max-width: 800px; margin: 3rem auto; padding: 0 1.5rem;">
+    <div style="background: var(--bg-card); border: 1px solid var(--border-subtle); border-radius: 20px; padding: 2rem; text-align: center;">
+      <h3 style="font-size: 1.25rem; font-weight: 800; color: #fff; margin-bottom: 0.4rem;">
+        🔍 Check Payment or View ABA KHQR
+      </h3>
+      <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1.25rem;">
+        Have an existing order number or top-up reference? Enter it below to view your live ABA KHQR or check real-time status:
+      </p>
+      <div style="display: flex; gap: 0.75rem; max-width: 500px; margin: 0 auto; flex-wrap: wrap;">
+        <input type="text" id="lookupInput" placeholder="e.g. ORD-20261023-... or TOPUP-..." 
+          style="flex: 1; min-width: 200px; padding: 0.75rem 1rem; background: var(--bg-input); border: 1px solid var(--border-subtle); border-radius: 10px; color: #fff; font-family: var(--font-mono); font-size: 0.85rem;" />
+        <button class="btn btn-primary" id="lookupBtn">
+          <span>Search Status</span>
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="footer-container">
+      <div>
+        <div style="display: flex; align-items: center; gap: 0.6rem; margin-bottom: 0.5rem;">
+          <div class="logo-badge" style="width: 28px; height: 28px; font-size: 0.8rem;">NM</div>
+          <span style="font-weight: 800; color: #fff; letter-spacing: 1px;">NIGHTMARE STORE</span>
+        </div>
+        <p class="footer-text">Authorized digital seller for Rockstar Games gaming assets in Cambodia.</p>
+        <p class="footer-text" style="font-size: 0.75rem; margin-top: 0.25rem;">Powered by ABA PayWay &amp; Bakong KHQR Settlement Engine.</p>
+      </div>
+
+      <ul class="footer-links">
+        <li><a href="https://t.me/darastore_bot" target="_blank">Telegram Bot</a></li>
+        <li><a href="https://t.me/darazzdev" target="_blank">Contact Support (@darazzdev)</a></li>
+        <li><a href="/admin">Admin Portal</a></li>
+      </ul>
+    </div>
+  </footer>
+
+  <!-- Universal Checkout & ABA KHQR Modal -->
+  <div class="modal-overlay" id="checkoutModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 class="modal-title" id="modalTitle">
+          <span>💳</span> <span>ABA KHQR Checkout</span>
+        </h3>
+        <button class="modal-close-btn" id="closeModalBtn">&times;</button>
+      </div>
+      <div class="modal-body" id="modalBody">
+        <!-- Content populated dynamically by app.js -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="/js/app.js"></script>
+</body>
+</html>

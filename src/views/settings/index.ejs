@@ -1,0 +1,116 @@
+<%- include('../layouts/header', { title: 'System Settings', currentPath: '/admin/settings' }) %>
+
+<div class="space-y-6">
+  <div>
+    <h2 class="text-2xl font-black text-white tracking-wide">SYSTEM & INTEGRATION SETTINGS</h2>
+    <p class="text-xs text-gray-400 mt-1">Status of payment gateway, database, Telegram bot webhooks, and security</p>
+  </div>
+
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+    <!-- ABA PayWay Configuration -->
+    <div class="bg-nightmare-card border border-nightmare-border rounded-xl p-6 shadow-xl space-y-4">
+      <div class="flex items-center justify-between border-b border-nightmare-border pb-3">
+        <h3 class="text-base font-bold text-white flex items-center space-x-2">
+          <span>💳</span> <span>ABA PayWay Gateway</span>
+        </h3>
+        <% if (abaStatus.configured) { %>
+          <span class="px-2 py-0.5 text-[10px] font-bold rounded bg-emerald-950 text-emerald-400 border border-emerald-800">Connected</span>
+        <% } else { %>
+          <span class="px-2 py-0.5 text-[10px] font-bold rounded bg-amber-950 text-amber-400 border border-amber-800">Pending Keys</span>
+        <% } %>
+      </div>
+
+      <div class="space-y-2 text-xs">
+        <div class="flex justify-between py-1 border-b border-nightmare-border/40">
+          <span class="text-gray-400">Merchant ID:</span>
+          <span class="font-mono text-white"><%= abaStatus.merchantId || 'Not Configured' %></span>
+        </div>
+        <div class="flex justify-between py-1 border-b border-nightmare-border/40">
+          <span class="text-gray-400">API Endpoint:</span>
+          <span class="font-mono text-gray-300 truncate max-w-[200px]"><%= abaStatus.baseUrl %></span>
+        </div>
+        <div class="flex justify-between py-1">
+          <span class="text-gray-400">Mode:</span>
+          <span class="text-white"><%= abaStatus.baseUrl.includes('sandbox') ? 'Sandbox / Test' : 'Production Live' %></span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Telegram Bot Webhook Status -->
+    <div class="bg-nightmare-card border border-nightmare-border rounded-xl p-6 shadow-xl space-y-4">
+      <div class="flex items-center justify-between border-b border-nightmare-border pb-3">
+        <h3 class="text-base font-bold text-white flex items-center space-x-2">
+          <span>🤖</span> <span>Telegram Bot</span>
+        </h3>
+        <span class="px-2 py-0.5 text-[10px] font-bold rounded bg-emerald-950 text-emerald-400 border border-emerald-800">Active</span>
+      </div>
+
+      <div class="space-y-2 text-xs">
+        <div class="flex justify-between py-1 border-b border-nightmare-border/40">
+          <span class="text-gray-400">Bot Mode:</span>
+          <span class="text-white font-mono"><%= botStatus.mode %></span>
+        </div>
+        <div class="flex justify-between py-1 border-b border-nightmare-border/40">
+          <span class="text-gray-400">Webhook Route:</span>
+          <span class="font-mono text-gray-300">/webhook/telegram</span>
+        </div>
+        <div class="flex justify-between py-1">
+          <span class="text-gray-400">Secret Token Header:</span>
+          <span class="text-emerald-400">Enforced & Verified</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Supabase Database Status -->
+    <div class="bg-nightmare-card border border-nightmare-border rounded-xl p-6 shadow-xl space-y-4">
+      <div class="flex items-center justify-between border-b border-nightmare-border pb-3">
+        <h3 class="text-base font-bold text-white flex items-center space-x-2">
+          <span>🗄️</span> <span>PostgreSQL & Storage</span>
+        </h3>
+        <span class="px-2 py-0.5 text-[10px] font-bold rounded bg-emerald-950 text-emerald-400 border border-emerald-800">Connected</span>
+      </div>
+
+      <div class="space-y-2 text-xs">
+        <div class="flex justify-between py-1 border-b border-nightmare-border/40">
+          <span class="text-gray-400">Supabase Endpoint:</span>
+          <span class="font-mono text-gray-300 truncate max-w-[200px]"><%= dbStatus.url %></span>
+        </div>
+        <div class="flex justify-between py-1 border-b border-nightmare-border/40">
+          <span class="text-gray-400">Row Level Security:</span>
+          <span class="text-emerald-400">Enabled on all tables</span>
+        </div>
+        <div class="flex justify-between py-1">
+          <span class="text-gray-400">Storage Bucket:</span>
+          <span class="font-mono text-white">product-images (5MB limit)</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Security & Encryption -->
+    <div class="bg-nightmare-card border border-nightmare-border rounded-xl p-6 shadow-xl space-y-4">
+      <div class="flex items-center justify-between border-b border-nightmare-border pb-3">
+        <h3 class="text-base font-bold text-white flex items-center space-x-2">
+          <span>🔒</span> <span>Security Engine</span>
+        </h3>
+        <span class="px-2 py-0.5 text-[10px] font-bold rounded bg-emerald-950 text-emerald-400 border border-emerald-800">Hardened</span>
+      </div>
+
+      <div class="space-y-2 text-xs">
+        <div class="flex justify-between py-1 border-b border-nightmare-border/40">
+          <span class="text-gray-400">Inventory Encryption:</span>
+          <span class="text-white">AES-256-GCM (Authenticated)</span>
+        </div>
+        <div class="flex justify-between py-1 border-b border-nightmare-border/40">
+          <span class="text-gray-400">Code Hashing:</span>
+          <span class="text-white">SHA-256 Unique Digest</span>
+        </div>
+        <div class="flex justify-between py-1">
+          <span class="text-gray-400">Session Protection:</span>
+          <span class="text-white">HttpOnly, SameSite, Secure</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<%- include('../layouts/footer') %>

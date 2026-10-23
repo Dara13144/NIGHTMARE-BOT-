@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= title || 'Admin Dashboard' %> - NIGHTMARE STORE</title>
+  <!-- Tailwind CSS via CDN with custom dark styling -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            nightmare: {
+              black: '#070709',
+              dark: '#0f0f13',
+              card: '#16161c',
+              border: '#262633',
+              accent: '#dc2626',
+              accentHover: '#ef4444'
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <link rel="stylesheet" href="/css/admin.css">
+</head>
+<body class="bg-nightmare-black text-gray-200 min-h-screen flex font-sans antialiased">
+  <% if (locals.currentUser) { %>
+  <!-- Sidebar Navigation -->
+  <aside class="w-64 bg-nightmare-dark border-r border-nightmare-border flex flex-col fixed inset-y-0 z-30">
+    <div class="p-5 border-b border-nightmare-border flex items-center justify-between">
+      <div class="flex items-center space-x-3">
+        <div class="w-9 h-9 rounded-lg bg-red-950 border border-red-700 flex items-center justify-center font-black text-red-500 text-lg shadow-lg shadow-red-950">
+          NM
+        </div>
+        <div>
+          <h1 class="text-sm font-black tracking-widest text-red-500 uppercase">NIGHTMARE</h1>
+          <p class="text-xs text-gray-500 font-mono">STORE ADMIN</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Navigation Links -->
+    <nav class="flex-1 p-3 space-y-1 overflow-y-auto">
+      <a href="/admin" class="flex items-center space-x-3 px-3 py-2.5 rounded-lg text-sm font-medium hover:bg-nightmare-card hover:text-white transition <%= currentPath === '/admin' ? 'bg-red-950/40 text-red-400 border border-red-900/50' : 'text-gray-400' %>">
+        <span>📊</span> <span>Overview</span>
+      </a>
+      <a href="/admin/products" class="flex items-center space-x-3 px-3 py-2.5 rounded-lg text-sm font-medium hover:bg-nightmare-card hover:text-white transition <%= currentPath.startsWith('/admin/products') ? 'bg-red-950/40 text-red-400 border border-red-900/50' : 'text-gray-400' %>">
+        <span>🎮</span> <span>Products</span>
+      </a>
+      <a href="/admin/inventory/accounts" class="flex items-center space-x-3 px-3 py-2.5 rounded-lg text-sm font-medium hover:bg-nightmare-card hover:text-white transition <%= currentPath === '/admin/inventory/accounts' ? 'bg-red-950/40 text-red-400 border border-red-900/50' : 'text-gray-400' %>">
+        <span>👤</span> <span>Account Stock</span>
+      </a>
+      <a href="/admin/inventory/codes" class="flex items-center space-x-3 px-3 py-2.5 rounded-lg text-sm font-medium hover:bg-nightmare-card hover:text-white transition <%= currentPath === '/admin/inventory/codes' ? 'bg-red-950/40 text-red-400 border border-red-900/50' : 'text-gray-400' %>">
+        <span>🔑</span> <span>Code Stock</span>
+      </a>
+      <a href="/admin/orders" class="flex items-center space-x-3 px-3 py-2.5 rounded-lg text-sm font-medium hover:bg-nightmare-card hover:text-white transition <%= currentPath.startsWith('/admin/orders') ? 'bg-red-950/40 text-red-400 border border-red-900/50' : 'text-gray-400' %>">
+        <span>📦</span> <span>Orders</span>
+      </a>
+      <a href="/admin/payments" class="flex items-center space-x-3 px-3 py-2.5 rounded-lg text-sm font-medium hover:bg-nightmare-card hover:text-white transition <%= currentPath.startsWith('/admin/payments') ? 'bg-red-950/40 text-red-400 border border-red-900/50' : 'text-gray-400' %>">
+        <span>💳</span> <span>Payments</span>
+      </a>
+      <a href="/admin/customers" class="flex items-center space-x-3 px-3 py-2.5 rounded-lg text-sm font-medium hover:bg-nightmare-card hover:text-white transition <%= currentPath.startsWith('/admin/customers') ? 'bg-red-950/40 text-red-400 border border-red-900/50' : 'text-gray-400' %>">
+        <span>👥</span> <span>Customers</span>
+      </a>
+      <a href="/admin/memberships" class="flex items-center space-x-3 px-3 py-2.5 rounded-lg text-sm font-medium hover:bg-nightmare-card hover:text-white transition <%= currentPath.startsWith('/admin/memberships') ? 'bg-red-950/40 text-red-400 border border-red-900/50' : 'text-gray-400' %>">
+        <span>⭐</span> <span>VIP Members</span>
+      </a>
+      <a href="/admin/promotions" class="flex items-center space-x-3 px-3 py-2.5 rounded-lg text-sm font-medium hover:bg-nightmare-card hover:text-white transition <%= currentPath.startsWith('/admin/promotions') ? 'bg-red-950/40 text-red-400 border border-red-900/50' : 'text-gray-400' %>">
+        <span>🎁</span> <span>Promotions</span>
+      </a>
+      <a href="/admin/support" class="flex items-center space-x-3 px-3 py-2.5 rounded-lg text-sm font-medium hover:bg-nightmare-card hover:text-white transition <%= currentPath.startsWith('/admin/support') ? 'bg-red-950/40 text-red-400 border border-red-900/50' : 'text-gray-400' %>">
+        <span>💬</span> <span>Support Tickets</span>
+      </a>
+      <a href="/admin/audit" class="flex items-center space-x-3 px-3 py-2.5 rounded-lg text-sm font-medium hover:bg-nightmare-card hover:text-white transition <%= currentPath.startsWith('/admin/audit') ? 'bg-red-950/40 text-red-400 border border-red-900/50' : 'text-gray-400' %>">
+        <span>🛡️</span> <span>Audit Logs</span>
+      </a>
+      <a href="/admin/settings" class="flex items-center space-x-3 px-3 py-2.5 rounded-lg text-sm font-medium hover:bg-nightmare-card hover:text-white transition <%= currentPath.startsWith('/admin/settings') ? 'bg-red-950/40 text-red-400 border border-red-900/50' : 'text-gray-400' %>">
+        <span>⚙️</span> <span>Settings</span>
+      </a>
+    </nav>
+
+    <!-- User & Logout Footer -->
+    <div class="p-4 border-t border-nightmare-border bg-nightmare-card/40 flex items-center justify-between">
+      <div class="flex items-center space-x-2">
+        <div class="w-8 h-8 rounded-full bg-red-900/40 border border-red-700/60 flex items-center justify-center text-xs font-bold text-red-400">
+          <%= currentUser.username[0].toUpperCase() %>
+        </div>
+        <div class="truncate">
+          <p class="text-xs font-semibold text-gray-200 truncate"><%= currentUser.username %></p>
+          <span class="text-[10px] text-red-400 bg-red-950 px-1.5 py-0.5 rounded border border-red-900"><%= currentUser.role %></span>
+        </div>
+      </div>
+      <form action="/admin/logout" method="POST">
+        <button type="submit" title="Logout" class="text-gray-400 hover:text-red-400 p-1.5 rounded hover:bg-nightmare-dark transition">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
+          </svg>
+        </button>
+      </form>
+    </div>
+  </aside>
+  <% } %>
+
+  <!-- Main Content Area -->
+  <main class="<%= locals.currentUser ? 'ml-64 flex-1 min-h-screen p-8 bg-nightmare-black overflow-x-hidden' : 'w-full min-h-screen' %>">

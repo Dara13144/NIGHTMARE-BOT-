@@ -1,0 +1,72 @@
+<%- include('../layouts/header', { title: 'Support Tickets', currentPath: '/admin/support' }) %>
+
+<div class="space-y-6">
+  <div>
+    <h2 class="text-2xl font-black text-white tracking-wide">CUSTOMER SUPPORT TICKETS</h2>
+    <p class="text-xs text-gray-400 mt-1">Review and resolve customer inquiries submitted through the Telegram bot</p>
+  </div>
+
+  <div class="bg-nightmare-card border border-nightmare-border rounded-xl shadow-xl overflow-hidden">
+    <div class="overflow-x-auto">
+      <table class="w-full text-left text-sm text-gray-300">
+        <thead class="bg-nightmare-dark text-[11px] uppercase tracking-wider text-gray-400 border-b border-nightmare-border font-semibold">
+          <tr>
+            <th class="px-5 py-3.5">Ticket #</th>
+            <th class="px-5 py-3.5">Customer (TG)</th>
+            <th class="px-5 py-3.5">Subject & Message</th>
+            <th class="px-5 py-3.5">Status</th>
+            <th class="px-5 py-3.5">Submitted At</th>
+            <th class="px-5 py-3.5 text-right">Actions</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-nightmare-border/60">
+          <% if (tickets.length === 0) { %>
+            <tr>
+              <td colspan="6" class="px-5 py-8 text-center text-gray-500 text-sm">
+                No support tickets currently recorded.
+              </td>
+            </tr>
+          <% } %>
+          <% tickets.forEach(ticket => { %>
+            <tr class="hover:bg-nightmare-dark/50 transition">
+              <td class="px-5 py-4 font-mono font-bold text-white text-xs">
+                <%= ticket.ticket_number %>
+              </td>
+              <td class="px-5 py-4 font-mono text-xs text-gray-400">
+                <%= ticket.telegram_id %>
+              </td>
+              <td class="px-5 py-4 text-xs">
+                <div class="font-bold text-white"><%= ticket.subject %></div>
+                <div class="text-gray-400 mt-0.5 line-clamp-2"><%= ticket.message %></div>
+              </td>
+              <td class="px-5 py-4">
+                <% if (ticket.status === 'open') { %>
+                  <span class="px-2 py-0.5 text-[10px] font-bold rounded bg-amber-950 text-amber-400 border border-amber-800">Open</span>
+                <% } else if (ticket.status === 'in_progress') { %>
+                  <span class="px-2 py-0.5 text-[10px] font-bold rounded bg-blue-950 text-blue-400 border border-blue-800">In Progress</span>
+                <% } else { %>
+                  <span class="px-2 py-0.5 text-[10px] font-bold rounded bg-emerald-950 text-emerald-400 border border-emerald-800">Resolved</span>
+                <% } %>
+              </td>
+              <td class="px-5 py-4 text-xs text-gray-400">
+                <%= new Date(ticket.created_at).toLocaleString() %>
+              </td>
+              <td class="px-5 py-4 text-right">
+                <% if (ticket.status !== 'resolved') { %>
+                  <form action="/admin/support/<%= ticket.id %>/resolve" method="POST" class="inline">
+                    <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                    <button type="submit" class="text-xs text-emerald-400 hover:text-emerald-300 font-semibold cursor-pointer">
+                      Mark Resolved
+                    </button>
+                  </form>
+                <% } %>
+              </td>
+            </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<%- include('../layouts/footer') %>

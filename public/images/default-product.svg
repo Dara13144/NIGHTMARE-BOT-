@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="400" height="400" viewBox="0 0 400 400" fill="none">
+  <rect width="400" height="400" fill="#0A0A0E"/>
+  <rect x="2" y="2" width="396" height="396" stroke="#262633" stroke-width="4"/>
+  <circle cx="200" cy="180" r="70" fill="#16161C" stroke="#DC2626" stroke-width="4"/>
+  <path d="M170 180H230M200 150V210" stroke="#DC2626" stroke-width="6" stroke-linecap="round"/>
+  <circle cx="240" cy="160" r="6" fill="#DC2626"/>
+  <circle cx="255" cy="175" r="6" fill="#DC2626"/>
+  <text x="200" y="290" text-anchor="middle" fill="#FFFFFF" font-family="system-ui, -apple-system, sans-serif" font-size="20" font-weight="900" letter-spacing="2">NIGHTMARE STORE</text>
+  <text x="200" y="320" text-anchor="middle" fill="#71717A" font-family="system-ui, -apple-system, sans-serif" font-size="12" font-weight="600" letter-spacing="1">ROCKSTAR DIGITAL ITEM</text>
+</svg>

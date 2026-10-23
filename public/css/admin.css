@@ -1,0 +1,46 @@
+/* Custom styling for Nightmare Store Admin */
+body {
+  background-color: #070709;
+  color: #e5e7eb;
+}
+
+/* Custom dark scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #0f0f13;
+}
+::-webkit-scrollbar-thumb {
+  background: #262633;
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #dc2626;
+}
+
+/* Custom focus ring */
+input:focus, select:focus, textarea:focus {
+  border-color: #dc2626 !important;
+  box-shadow: 0 0 0 1px #dc2626 !important;
+}
+
+/* Telegram Green Buy Button style */
+.btn-buy-green {
+  background-color: #3b6e3d !important;
+  color: #ffffff !important;
+  border-radius: 8px;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 20px;
+  gap: 8px;
+  transition: background-color 0.2s, transform 0.1s;
+}
+.btn-buy-green:hover {
+  background-color: #4a8b4e !important;
+  transform: translateY(-1px);
+}
+

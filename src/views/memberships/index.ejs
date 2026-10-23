@@ -1,0 +1,64 @@
+<%- include('../layouts/header', { title: 'VIP Memberships', currentPath: '/admin/memberships' }) %>
+
+<div class="space-y-6">
+  <div>
+    <h2 class="text-2xl font-black text-white tracking-wide">STORE VIP MEMBERSHIPS</h2>
+    <p class="text-xs text-gray-400 mt-1">Manage recurring Nightmare Store VIP discount tiers</p>
+  </div>
+
+  <div class="bg-nightmare-card border border-nightmare-border rounded-xl shadow-xl overflow-hidden">
+    <div class="overflow-x-auto">
+      <table class="w-full text-left text-sm text-gray-300">
+        <thead class="bg-nightmare-dark text-[11px] uppercase tracking-wider text-gray-400 border-b border-nightmare-border font-semibold">
+          <tr>
+            <th class="px-5 py-3.5">Customer</th>
+            <th class="px-5 py-3.5">VIP Tier</th>
+            <th class="px-5 py-3.5">Discount Rate</th>
+            <th class="px-5 py-3.5">Status</th>
+            <th class="px-5 py-3.5">Valid Until</th>
+            <th class="px-5 py-3.5">Activated At</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-nightmare-border/60">
+          <% if (memberships.length === 0) { %>
+            <tr>
+              <td colspan="6" class="px-5 py-8 text-center text-gray-500 text-sm">
+                No active VIP memberships currently registered.
+              </td>
+            </tr>
+          <% } %>
+          <% memberships.forEach(m => { %>
+            <tr class="hover:bg-nightmare-dark/50 transition">
+              <td class="px-5 py-4 font-semibold text-white text-xs">
+                <%= m.profiles ? (m.profiles.first_name || 'User') + ' (' + m.profiles.telegram_id + ')' : 'Unknown Customer' %>
+              </td>
+              <td class="px-5 py-4">
+                <span class="px-2.5 py-0.5 text-[11px] font-bold rounded-full bg-amber-950 text-amber-400 border border-amber-800">
+                  ⭐ <%= m.tier %>
+                </span>
+              </td>
+              <td class="px-5 py-4 font-bold text-emerald-400">
+                <%= m.discount_percentage %>% OFF
+              </td>
+              <td class="px-5 py-4">
+                <% if (m.status === 'active' && new Date(m.end_date) > new Date()) { %>
+                  <span class="px-2 py-0.5 text-[10px] font-bold rounded bg-emerald-950 text-emerald-400 border border-emerald-800">Active</span>
+                <% } else { %>
+                  <span class="px-2 py-0.5 text-[10px] font-bold rounded bg-gray-900 text-gray-400 border border-gray-700">Expired</span>
+                <% } %>
+              </td>
+              <td class="px-5 py-4 text-xs text-gray-400">
+                <%= new Date(m.end_date).toLocaleDateString() %>
+              </td>
+              <td class="px-5 py-4 text-xs text-gray-400">
+                <%= new Date(m.created_at).toLocaleDateString() %>
+              </td>
+            </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<%- include('../layouts/footer') %>

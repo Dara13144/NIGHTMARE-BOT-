@@ -1,0 +1,75 @@
+<%- include('../layouts/header', { title: 'Payment Transactions', currentPath: '/admin/payments' }) %>
+
+<div class="space-y-6">
+  <div>
+    <h2 class="text-2xl font-black text-white tracking-wide">PAYMENT TRANSACTIONS</h2>
+    <p class="text-xs text-gray-400 mt-1">ABA PayWay gateway ledger with real-time merchant status syncing</p>
+  </div>
+
+  <div class="bg-nightmare-card border border-nightmare-border rounded-xl shadow-xl overflow-hidden">
+    <div class="overflow-x-auto">
+      <table class="w-full text-left text-sm text-gray-300">
+        <thead class="bg-nightmare-dark text-[11px] uppercase tracking-wider text-gray-400 border-b border-nightmare-border font-semibold">
+          <tr>
+            <th class="px-5 py-3.5">Merchant Order Ref</th>
+            <th class="px-5 py-3.5">Gateway Tran ID (APV)</th>
+            <th class="px-5 py-3.5">Provider</th>
+            <th class="px-5 py-3.5">Amount</th>
+            <th class="px-5 py-3.5">Status</th>
+            <th class="px-5 py-3.5">Verified At</th>
+            <th class="px-5 py-3.5 text-right">Actions</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-nightmare-border/60">
+          <% if (payments.length === 0) { %>
+            <tr>
+              <td colspan="7" class="px-5 py-8 text-center text-gray-500 text-sm">
+                No payment transactions recorded yet.
+              </td>
+            </tr>
+          <% } %>
+          <% payments.forEach(p => { %>
+            <tr class="hover:bg-nightmare-dark/50 transition">
+              <td class="px-5 py-4 font-mono font-bold text-white text-xs">
+                <%= p.merchant_order_ref %>
+              </td>
+              <td class="px-5 py-4 font-mono text-xs text-gray-400">
+                <%= p.transaction_id || '—' %>
+              </td>
+              <td class="px-5 py-4 text-xs text-gray-400">
+                <%= p.provider || 'ABA PayWay' %>
+              </td>
+              <td class="px-5 py-4 font-bold text-white">
+                $<%= Number(p.amount).toFixed(2) %> <%= p.currency %>
+              </td>
+              <td class="px-5 py-4">
+                <% if (p.status === 'paid') { %>
+                  <span class="px-2.5 py-0.5 text-[11px] font-bold rounded-full bg-emerald-950 text-emerald-400 border border-emerald-800">Paid</span>
+                <% } else if (p.status === 'pending') { %>
+                  <span class="px-2.5 py-0.5 text-[11px] font-bold rounded-full bg-amber-950 text-amber-400 border border-amber-800">Pending</span>
+                <% } else { %>
+                  <span class="px-2.5 py-0.5 text-[11px] font-bold rounded-full bg-gray-900 text-gray-400 border border-gray-700"><%= p.status %></span>
+                <% } %>
+              </td>
+              <td class="px-5 py-4 text-xs text-gray-400">
+                <%= p.verified_at ? new Date(p.verified_at).toLocaleString() : '—' %>
+              </td>
+              <td class="px-5 py-4 text-right">
+                <% if (p.status === 'pending') { %>
+                  <form action="/admin/payments/<%= p.merchant_order_ref %>/sync" method="POST" class="inline">
+                    <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                    <button type="submit" class="text-xs text-blue-400 hover:text-blue-300 font-semibold bg-blue-950/60 border border-blue-800 px-2.5 py-1 rounded cursor-pointer">
+                      Check Gateway
+                    </button>
+                  </form>
+                <% } %>
+              </td>
+            </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<%- include('../layouts/footer') %>

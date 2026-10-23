@@ -1,0 +1,87 @@
+<%- include('../layouts/header', { title: 'Order Management', currentPath: '/admin/orders' }) %>
+
+<div class="space-y-6">
+  <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+    <div>
+      <h2 class="text-2xl font-black text-white tracking-wide">ORDER FULFILLMENT & HISTORY</h2>
+      <p class="text-xs text-gray-400 mt-1">Monitor digital delivery and payment lifecycle</p>
+    </div>
+    <div class="flex items-center space-x-2">
+      <a href="/admin/orders" class="px-3 py-1.5 rounded text-xs font-semibold <%= !currentStatus ? 'bg-red-950 text-red-400 border border-red-800' : 'bg-nightmare-card text-gray-400' %>">All</a>
+      <a href="/admin/orders?status=delivered" class="px-3 py-1.5 rounded text-xs font-semibold <%= currentStatus === 'delivered' ? 'bg-emerald-950 text-emerald-400 border border-emerald-800' : 'bg-nightmare-card text-gray-400' %>">Delivered</a>
+      <a href="/admin/orders?status=delivery_failed" class="px-3 py-1.5 rounded text-xs font-semibold <%= currentStatus === 'delivery_failed' ? 'bg-red-950 text-red-400 border border-red-800' : 'bg-nightmare-card text-gray-400' %>">Delivery Failed</a>
+      <a href="/admin/orders?status=pending" class="px-3 py-1.5 rounded text-xs font-semibold <%= currentStatus === 'pending' ? 'bg-amber-950 text-amber-400 border border-amber-800' : 'bg-nightmare-card text-gray-400' %>">Pending</a>
+    </div>
+  </div>
+
+  <div class="bg-nightmare-card border border-nightmare-border rounded-xl shadow-xl overflow-hidden">
+    <div class="overflow-x-auto">
+      <table class="w-full text-left text-sm text-gray-300">
+        <thead class="bg-nightmare-dark text-[11px] uppercase tracking-wider text-gray-400 border-b border-nightmare-border font-semibold">
+          <tr>
+            <th class="px-5 py-3.5">Order Ref</th>
+            <th class="px-5 py-3.5">Telegram ID</th>
+            <th class="px-5 py-3.5">Amount</th>
+            <th class="px-5 py-3.5">Status</th>
+            <th class="px-5 py-3.5">Delivery Notes</th>
+            <th class="px-5 py-3.5">Date</th>
+            <th class="px-5 py-3.5 text-right">Actions</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-nightmare-border/60">
+          <% if (orders.length === 0) { %>
+            <tr>
+              <td colspan="7" class="px-5 py-8 text-center text-gray-500 text-sm">
+                No orders match the selected criteria.
+              </td>
+            </tr>
+          <% } %>
+          <% orders.forEach(order => { %>
+            <tr class="hover:bg-nightmare-dark/50 transition">
+              <td class="px-5 py-4 font-mono font-bold text-white text-xs">
+                <%= order.order_number %>
+              </td>
+              <td class="px-5 py-4 font-mono text-xs text-gray-400">
+                <%= order.telegram_id %>
+              </td>
+              <td class="px-5 py-4 font-bold text-white">
+                $<%= Number(order.total_amount).toFixed(2) %>
+              </td>
+              <td class="px-5 py-4">
+                <% if (order.status === 'delivered') { %>
+                  <span class="px-2.5 py-0.5 text-[11px] font-bold rounded-full bg-emerald-950 text-emerald-400 border border-emerald-800">Delivered</span>
+                <% } else if (order.status === 'paid') { %>
+                  <span class="px-2.5 py-0.5 text-[11px] font-bold rounded-full bg-blue-950 text-blue-400 border border-blue-800">Paid</span>
+                <% } else if (order.status === 'delivery_failed') { %>
+                  <span class="px-2.5 py-0.5 text-[11px] font-bold rounded-full bg-red-950 text-red-400 border border-red-800">Delivery Failed</span>
+                <% } else if (order.status === 'pending') { %>
+                  <span class="px-2.5 py-0.5 text-[11px] font-bold rounded-full bg-amber-950 text-amber-400 border border-amber-800">Pending</span>
+                <% } else { %>
+                  <span class="px-2.5 py-0.5 text-[11px] font-bold rounded-full bg-gray-900 text-gray-400 border border-gray-700"><%= order.status %></span>
+                <% } %>
+              </td>
+              <td class="px-5 py-4 text-xs text-gray-400 max-w-xs truncate">
+                <%= order.delivery_notes || '—' %>
+              </td>
+              <td class="px-5 py-4 text-xs text-gray-400">
+                <%= new Date(order.created_at).toLocaleString() %>
+              </td>
+              <td class="px-5 py-4 text-right space-x-2">
+                <% if (order.status === 'delivery_failed' || order.status === 'paid') { %>
+                  <form action="/admin/orders/<%= order.id %>/retry-delivery" method="POST" class="inline">
+                    <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                    <button type="submit" class="text-xs text-amber-400 hover:text-amber-300 font-bold bg-amber-950/60 border border-amber-800 px-2 py-1 rounded cursor-pointer">
+                      Retry Send
+                    </button>
+                  </form>
+                <% } %>
+              </td>
+            </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<%- include('../layouts/footer') %>

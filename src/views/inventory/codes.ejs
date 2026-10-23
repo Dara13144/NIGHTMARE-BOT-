@@ -1,0 +1,184 @@
+<%- include('../layouts/header', { title: 'Rockstar Code Inventory', currentPath: '/admin/inventory/codes' }) %>
+
+<div class="space-y-6">
+  <div class="flex items-center justify-between">
+    <div>
+      <h2 class="text-2xl font-black text-white tracking-wide">ROCKSTAR ACTIVATION CODE INVENTORY</h2>
+      <p class="text-xs text-gray-400 mt-1">Codes protected with SHA-256 duplicate hashing & AES-256-GCM encryption.</p>
+    </div>
+    <div class="flex items-center space-x-3">
+      <button onclick="document.getElementById('newCodeModal').classList.remove('hidden')" class="bg-nightmare-card hover:bg-nightmare-border text-gray-200 border border-nightmare-border text-xs font-semibold px-4 py-2.5 rounded-lg transition cursor-pointer">
+        + Add Single Code
+      </button>
+      <button onclick="document.getElementById('bulkCodesModal').classList.remove('hidden')" class="bg-red-700 hover:bg-red-800 text-white text-xs font-bold uppercase tracking-wider px-4 py-2.5 rounded-lg transition shadow-md shadow-red-950 flex items-center space-x-2 cursor-pointer">
+        <span>⚡</span> <span>Bulk Import CSV / List</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Stock KPI Metrics -->
+  <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+    <div class="bg-nightmare-card border border-nightmare-border rounded-xl p-4 shadow-lg">
+      <div class="text-[11px] font-bold text-gray-400 uppercase tracking-wider">Available Codes</div>
+      <div class="text-2xl font-black text-emerald-400 mt-1">
+        <%= items.filter(i => i.status === 'available').length %>
+      </div>
+      <div class="text-[10px] text-gray-500 mt-0.5">Ready for instant delivery</div>
+    </div>
+    <div class="bg-nightmare-card border border-nightmare-border rounded-xl p-4 shadow-lg">
+      <div class="text-[11px] font-bold text-gray-400 uppercase tracking-wider">Reserved Codes</div>
+      <div class="text-2xl font-black text-amber-400 mt-1">
+        <%= items.filter(i => i.status === 'reserved').length %>
+      </div>
+      <div class="text-[10px] text-gray-500 mt-0.5">Locked during checkout</div>
+    </div>
+    <div class="bg-nightmare-card border border-nightmare-border rounded-xl p-4 shadow-lg">
+      <div class="text-[11px] font-bold text-gray-400 uppercase tracking-wider">Sold Codes</div>
+      <div class="text-2xl font-black text-blue-400 mt-1">
+        <%= items.filter(i => i.status === 'sold').length %>
+      </div>
+      <div class="text-[10px] text-gray-500 mt-0.5">Successfully fulfilled</div>
+    </div>
+    <div class="bg-nightmare-card border border-nightmare-border rounded-xl p-4 shadow-lg">
+      <div class="text-[11px] font-bold text-gray-400 uppercase tracking-wider">Total Stored</div>
+      <div class="text-2xl font-black text-purple-400 mt-1">
+        <%= items.length %>
+      </div>
+      <div class="text-[10px] text-gray-500 mt-0.5">All time records</div>
+    </div>
+  </div>
+
+  <div class="bg-nightmare-card border border-nightmare-border rounded-xl shadow-xl overflow-hidden">
+    <div class="overflow-x-auto">
+      <table class="w-full text-left text-sm text-gray-300">
+        <thead class="bg-nightmare-dark text-[11px] uppercase tracking-wider text-gray-400 border-b border-nightmare-border font-semibold">
+          <tr>
+            <th class="px-5 py-3.5">Code Hash (SHA-256)</th>
+            <th class="px-5 py-3.5">Product Title</th>
+            <th class="px-5 py-3.5">Status</th>
+            <th class="px-5 py-3.5">Reserved Order</th>
+            <th class="px-5 py-3.5">Added At</th>
+            <th class="px-5 py-3.5 text-right">Actions</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-nightmare-border/60">
+          <% if (items.length === 0) { %>
+            <tr>
+              <td colspan="6" class="px-5 py-8 text-center text-gray-500 text-sm">
+                No activation codes found. Click "Bulk Import CSV / List" to inject authorized inventory.
+              </td>
+            </tr>
+          <% } %>
+          <% items.forEach(item => { %>
+            <tr class="hover:bg-nightmare-dark/50 transition">
+              <td class="px-5 py-4 font-mono text-xs text-gray-400">
+                <%= item.id.slice(0, 12) %>...
+              </td>
+              <td class="px-5 py-4 font-bold text-white text-xs">
+                <%= item.products ? item.products.title : 'Unassigned Product' %>
+              </td>
+              <td class="px-5 py-4">
+                <% if (item.status === 'available') { %>
+                  <span class="px-2.5 py-0.5 text-[11px] font-bold rounded-full bg-emerald-950 text-emerald-400 border border-emerald-800">Available</span>
+                <% } else if (item.status === 'reserved') { %>
+                  <span class="px-2.5 py-0.5 text-[11px] font-bold rounded-full bg-amber-950 text-amber-400 border border-amber-800">Reserved</span>
+                <% } else if (item.status === 'sold') { %>
+                  <span class="px-2.5 py-0.5 text-[11px] font-bold rounded-full bg-gray-900 text-gray-400 border border-gray-700">Sold</span>
+                <% } else { %>
+                  <span class="px-2.5 py-0.5 text-[11px] font-bold rounded-full bg-red-950 text-red-400 border border-red-800">Disabled</span>
+                <% } %>
+              </td>
+              <td class="px-5 py-4 font-mono text-xs text-gray-400">
+                <%= item.reserved_order_id ? item.reserved_order_id.slice(0, 8) + '...' : '—' %>
+              </td>
+              <td class="px-5 py-4 text-xs text-gray-400">
+                <%= new Date(item.created_at).toLocaleString() %>
+              </td>
+              <td class="px-5 py-4 text-right space-x-2">
+                <% if (item.status === 'available') { %>
+                  <form action="/admin/inventory/codes/<%= item.id %>/disable" method="POST" class="inline" onsubmit="return confirm('Disable this code item?')">
+                    <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                    <button type="submit" class="text-xs text-amber-500 hover:text-amber-400 font-semibold cursor-pointer">Disable</button>
+                  </form>
+                  <form action="/admin/inventory/codes/<%= item.id %>/delete" method="POST" class="inline" onsubmit="return confirm('Permanently delete this code from stock?')">
+                    <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                    <button type="submit" class="text-xs text-red-500 hover:text-red-400 font-semibold cursor-pointer">Delete</button>
+                  </form>
+                <% } %>
+              </td>
+            </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- Bulk Import Codes Modal -->
+<div id="bulkCodesModal" class="hidden fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+  <div class="bg-nightmare-dark border border-nightmare-border rounded-xl max-w-lg w-full p-6 shadow-2xl">
+    <div class="flex items-center justify-between pb-4 border-b border-nightmare-border">
+      <h3 class="text-lg font-bold text-white">Bulk Import Activation Codes</h3>
+      <button onclick="document.getElementById('bulkCodesModal').classList.add('hidden')" class="text-gray-500 hover:text-white">&times;</button>
+    </div>
+
+    <form action="/admin/inventory/codes/bulk" method="POST" class="mt-4 space-y-4">
+      <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+
+      <div>
+        <label class="block text-xs font-semibold text-gray-300 uppercase mb-1">Target Code Product</label>
+        <select name="product_id" required class="w-full px-3 py-2 bg-nightmare-card border border-nightmare-border rounded text-sm text-white">
+          <% products.forEach(p => { %>
+            <option value="<%= p.id %>"><%= p.title %> ($<%= p.price %>)</option>
+          <% }) %>
+        </select>
+      </div>
+
+      <div>
+        <label class="block text-xs font-semibold text-gray-300 uppercase mb-1">Paste Codes (One code per line or CSV)</label>
+        <textarea name="codes" rows="6" required placeholder="XXXX-XXXX-XXXX-XXXX&#10;YYYY-YYYY-YYYY-YYYY" class="w-full font-mono text-xs px-3 py-2 bg-nightmare-card border border-nightmare-border rounded text-white"></textarea>
+        <p class="text-[11px] text-gray-500 mt-1">Duplicates are automatically identified and skipped without error.</p>
+      </div>
+
+      <div class="flex justify-end space-x-3 pt-4 border-t border-nightmare-border">
+        <button type="button" onclick="document.getElementById('bulkCodesModal').classList.add('hidden')" class="px-4 py-2 bg-nightmare-card hover:bg-nightmare-border text-gray-300 text-xs font-semibold rounded">Cancel</button>
+        <button type="submit" class="px-4 py-2 bg-red-700 hover:bg-red-800 text-white text-xs font-bold rounded uppercase tracking-wider">Start Bulk Import</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Add Single Code Modal -->
+<div id="newCodeModal" class="hidden fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+  <div class="bg-nightmare-dark border border-nightmare-border rounded-xl max-w-md w-full p-6 shadow-2xl">
+    <div class="flex items-center justify-between pb-4 border-b border-nightmare-border">
+      <h3 class="text-lg font-bold text-white">Add Single Activation Code</h3>
+      <button onclick="document.getElementById('newCodeModal').classList.add('hidden')" class="text-gray-500 hover:text-white">&times;</button>
+    </div>
+
+    <form action="/admin/inventory/codes/single" method="POST" class="mt-4 space-y-4">
+      <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+
+      <div>
+        <label class="block text-xs font-semibold text-gray-300 uppercase mb-1">Target Code Product</label>
+        <select name="product_id" required class="w-full px-3 py-2 bg-nightmare-card border border-nightmare-border rounded text-sm text-white">
+          <% products.forEach(p => { %>
+            <option value="<%= p.id %>"><%= p.title %> ($<%= p.price %>)</option>
+          <% }) %>
+        </select>
+      </div>
+
+      <div>
+        <label class="block text-xs font-semibold text-gray-300 uppercase mb-1">Rockstar Activation Code</label>
+        <input type="text" name="code" required placeholder="XXXX-XXXX-XXXX-XXXX" class="w-full font-mono px-3 py-2 bg-nightmare-card border border-nightmare-border rounded text-sm text-white">
+      </div>
+
+      <div class="flex justify-end space-x-3 pt-4 border-t border-nightmare-border">
+        <button type="button" onclick="document.getElementById('newCodeModal').classList.add('hidden')" class="px-4 py-2 bg-nightmare-card hover:bg-nightmare-border text-gray-300 text-xs font-semibold rounded">Cancel</button>
+        <button type="submit" class="px-4 py-2 bg-red-700 hover:bg-red-800 text-white text-xs font-bold rounded uppercase tracking-wider">Save Code</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<%- include('../layouts/footer') %>

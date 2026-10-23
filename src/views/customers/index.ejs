@@ -1,0 +1,128 @@
+<%- include('../layouts/header', { title: 'Customers', currentPath: '/admin/customers' }) %>
+
+<div class="space-y-6">
+  <div>
+    <h2 class="text-2xl font-black text-white tracking-wide">TELEGRAM CUSTOMERS</h2>
+    <p class="text-xs text-gray-400 mt-1">Registered Telegram buyer profiles and language preferences</p>
+  </div>
+
+  <div class="bg-nightmare-card border border-nightmare-border rounded-xl shadow-xl overflow-hidden">
+    <div class="overflow-x-auto">
+      <table class="w-full text-left text-sm text-gray-300">
+        <thead class="bg-nightmare-dark text-[11px] uppercase tracking-wider text-gray-400 border-b border-nightmare-border font-semibold">
+          <tr>
+            <th class="px-5 py-3.5">Telegram ID</th>
+            <th class="px-5 py-3.5">Customer Name</th>
+            <th class="px-5 py-3.5">Username</th>
+            <th class="px-5 py-3.5">Wallet Balance</th>
+            <th class="px-5 py-3.5">Language</th>
+            <th class="px-5 py-3.5">Status</th>
+            <th class="px-5 py-3.5">Joined At</th>
+            <th class="px-5 py-3.5 text-right">Actions</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-nightmare-border/60">
+          <% if (customers.length === 0) { %>
+            <tr>
+              <td colspan="8" class="px-5 py-8 text-center text-gray-500 text-sm">
+                No customer profiles recorded yet. When users start the Telegram bot, they appear here.
+              </td>
+            </tr>
+          <% } %>
+          <% customers.forEach(c => { %>
+            <tr class="hover:bg-nightmare-dark/50 transition">
+              <td class="px-5 py-4 font-mono font-bold text-white text-xs">
+                <%= c.telegram_id %>
+              </td>
+              <td class="px-5 py-4 font-semibold text-white">
+                <%= c.first_name || 'Customer' %> <%= c.last_name || '' %>
+              </td>
+              <td class="px-5 py-4 text-xs text-gray-400">
+                <%= c.username ? '@' + c.username : 'None' %>
+              </td>
+              <td class="px-5 py-4 font-mono font-bold text-emerald-400 text-sm">
+                $<%= Number(c.balance || 0).toFixed(2) %>
+              </td>
+              <td class="px-5 py-4 text-xs">
+                <%= c.language_code === 'en' ? '🇬🇧 English' : '🇰🇭 ភាសាខ្មែរ' %>
+              </td>
+              <td class="px-5 py-4">
+                <% if (c.is_blocked) { %>
+                  <span class="px-2 py-0.5 text-[10px] font-bold rounded bg-red-950 text-red-400 border border-red-800">Blocked</span>
+                <% } else { %>
+                  <span class="px-2 py-0.5 text-[10px] font-bold rounded bg-emerald-950 text-emerald-400 border border-emerald-800">Active</span>
+                <% } %>
+              </td>
+              <td class="px-5 py-4 text-xs text-gray-400">
+                <%= new Date(c.created_at).toLocaleString() %>
+              </td>
+              <td class="px-5 py-4 text-right space-x-3">
+                <button onclick="openAdjustModal('<%= c.id %>', '<%= c.telegram_id %>', '<%= Number(c.balance || 0).toFixed(2) %>')" class="text-xs text-blue-400 hover:text-blue-300 hover:underline font-semibold cursor-pointer">
+                  💰 Adjust Balance
+                </button>
+                <form action="/admin/customers/<%= c.id %>/toggle-block" method="POST" class="inline">
+                  <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                  <button type="submit" class="text-xs <%= c.is_blocked ? 'text-emerald-400' : 'text-red-400' %> hover:underline font-semibold cursor-pointer">
+                    <%= c.is_blocked ? 'Unblock' : 'Block' %>
+                  </button>
+                </form>
+              </td>
+            </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- Balance Adjustment Modal -->
+<div id="adjustModal" class="hidden fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+  <div class="bg-nightmare-card border border-nightmare-border rounded-xl max-w-md w-full p-6 shadow-2xl relative">
+    <h3 class="text-lg font-bold text-white mb-2">Adjust Customer Wallet Balance</h3>
+    <p class="text-xs text-gray-400 mb-4">Telegram ID: <span id="modalTelegramId" class="font-mono text-white"></span> | Current Balance: <span id="modalCurrentBalance" class="font-mono text-emerald-400"></span></p>
+
+    <form id="adjustForm" method="POST" class="space-y-4">
+      <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+
+      <div>
+        <label class="block text-xs font-semibold text-gray-300 uppercase mb-1">Adjustment Amount (USD)</label>
+        <div class="relative">
+          <input type="number" step="0.01" name="amount" id="adjustAmount" required placeholder="e.g. 5.00 (add) or -2.00 (deduct)"
+            class="w-full bg-nightmare-dark border border-nightmare-border rounded-lg px-3 py-2 text-white text-sm focus:border-red-500 focus:outline-none">
+        </div>
+        <p class="text-[11px] text-gray-500 mt-1">Enter positive amount to add (e.g. 10.00) or negative amount to deduct (e.g. -5.00).</p>
+      </div>
+
+      <div>
+        <label class="block text-xs font-semibold text-gray-300 uppercase mb-1">Reason / Admin Note</label>
+        <input type="text" name="reason" placeholder="e.g. Manual top-up, customer reward, or refund"
+          class="w-full bg-nightmare-dark border border-nightmare-border rounded-lg px-3 py-2 text-white text-sm focus:border-red-500 focus:outline-none">
+      </div>
+
+      <div class="flex justify-end space-x-3 pt-3 border-t border-nightmare-border">
+        <button type="button" onclick="closeAdjustModal()" class="px-4 py-2 text-xs font-semibold text-gray-400 hover:text-white transition cursor-pointer">
+          Cancel
+        </button>
+        <button type="submit" class="px-4 py-2 text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-500 rounded-lg shadow-lg transition cursor-pointer">
+          Apply Adjustment
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+function openAdjustModal(customerId, telegramId, currentBalance) {
+  document.getElementById('adjustForm').action = '/admin/customers/' + customerId + '/adjust-balance';
+  document.getElementById('modalTelegramId').innerText = telegramId;
+  document.getElementById('modalCurrentBalance').innerText = '$' + currentBalance + ' USD';
+  document.getElementById('adjustAmount').value = '';
+  document.getElementById('adjustModal').classList.remove('hidden');
+}
+
+function closeAdjustModal() {
+  document.getElementById('adjustModal').classList.add('hidden');
+}
+</script>
+
+<%- include('../layouts/footer') %>

@@ -1,0 +1,43 @@
+services:
+  - type: web
+    name: nightmare-store
+    runtime: node
+    plan: starter
+    region: singapore
+    buildCommand: npm install
+    startCommand: npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 10000
+      - key: APP_BASE_URL
+        sync: false
+      - key: FRONTEND_URL
+        sync: false
+      - key: BOT_TOKEN
+        sync: false
+      - key: TELEGRAM_WEBHOOK_SECRET
+        sync: false
+      - key: ADMIN_TELEGRAM_IDS
+        sync: false
+      - key: SUPABASE_URL
+        sync: false
+      - key: SUPABASE_ANON_KEY
+        sync: false
+      - key: SUPABASE_SERVICE_ROLE_KEY
+        sync: false
+      - key: SESSION_SECRET
+        generateValue: true
+      - key: ENCRYPTION_KEY
+        sync: false
+      - key: ABA_PAYWAY_MERCHANT_ID
+        sync: false
+      - key: ABA_PAYWAY_API_KEY
+        sync: false
+      - key: ABA_PAYWAY_BASE_URL
+        value: https://checkout.payway.com.kh
+      - key: ABA_PAYWAY_CALLBACK_SECRET
+        sync: false
+      - key: LOG_LEVEL
+        value: info

@@ -1,0 +1,161 @@
+<%- include('../layouts/header', { title: 'Rockstar Account Inventory', currentPath: '/admin/inventory/accounts' }) %>
+
+<div class="space-y-6">
+  <div class="flex items-center justify-between">
+    <div>
+      <h2 class="text-2xl font-black text-white tracking-wide">ROCKSTAR ACCOUNT INVENTORY</h2>
+      <p class="text-xs text-gray-400 mt-1">Credentials stored with AES-256-GCM encryption. Never exposed in public endpoints.</p>
+    </div>
+    <button onclick="document.getElementById('newAccountModal').classList.remove('hidden')" class="bg-red-700 hover:bg-red-800 text-white text-xs font-bold uppercase tracking-wider px-4 py-2.5 rounded-lg transition shadow-md shadow-red-950 flex items-center space-x-2 cursor-pointer">
+      <span>+</span> <span>Add Single Account</span>
+    </button>
+  </div>
+
+  <!-- Stock KPI Metrics -->
+  <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+    <div class="bg-nightmare-card border border-nightmare-border rounded-xl p-4 shadow-lg">
+      <div class="text-[11px] font-bold text-gray-400 uppercase tracking-wider">Available Stock</div>
+      <div class="text-2xl font-black text-emerald-400 mt-1">
+        <%= items.filter(i => i.status === 'available').length %>
+      </div>
+      <div class="text-[10px] text-gray-500 mt-0.5">Ready for instant delivery</div>
+    </div>
+    <div class="bg-nightmare-card border border-nightmare-border rounded-xl p-4 shadow-lg">
+      <div class="text-[11px] font-bold text-gray-400 uppercase tracking-wider">Reserved Stock</div>
+      <div class="text-2xl font-black text-amber-400 mt-1">
+        <%= items.filter(i => i.status === 'reserved').length %>
+      </div>
+      <div class="text-[10px] text-gray-500 mt-0.5">Locked during checkout</div>
+    </div>
+    <div class="bg-nightmare-card border border-nightmare-border rounded-xl p-4 shadow-lg">
+      <div class="text-[11px] font-bold text-gray-400 uppercase tracking-wider">Sold Accounts</div>
+      <div class="text-2xl font-black text-blue-400 mt-1">
+        <%= items.filter(i => i.status === 'sold').length %>
+      </div>
+      <div class="text-[10px] text-gray-500 mt-0.5">Successfully fulfilled</div>
+    </div>
+    <div class="bg-nightmare-card border border-nightmare-border rounded-xl p-4 shadow-lg">
+      <div class="text-[11px] font-bold text-gray-400 uppercase tracking-wider">Total Stored</div>
+      <div class="text-2xl font-black text-purple-400 mt-1">
+        <%= items.length %>
+      </div>
+      <div class="text-[10px] text-gray-500 mt-0.5">All time records</div>
+    </div>
+  </div>
+
+  <div class="bg-nightmare-card border border-nightmare-border rounded-xl shadow-xl overflow-hidden">
+    <div class="overflow-x-auto">
+      <table class="w-full text-left text-sm text-gray-300">
+        <thead class="bg-nightmare-dark text-[11px] uppercase tracking-wider text-gray-400 border-b border-nightmare-border font-semibold">
+          <tr>
+            <th class="px-5 py-3.5">Item ID</th>
+            <th class="px-5 py-3.5">Product Title</th>
+            <th class="px-5 py-3.5">Status</th>
+            <th class="px-5 py-3.5">Reserved Order</th>
+            <th class="px-5 py-3.5">Added At</th>
+            <th class="px-5 py-3.5 text-right">Actions</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-nightmare-border/60">
+          <% if (items.length === 0) { %>
+            <tr>
+              <td colspan="6" class="px-5 py-8 text-center text-gray-500 text-sm">
+                No accounts currently in inventory. Click "Add Single Account" to add encrypted stock.
+              </td>
+            </tr>
+          <% } %>
+          <% items.forEach(item => { %>
+            <tr class="hover:bg-nightmare-dark/50 transition">
+              <td class="px-5 py-4 font-mono text-xs text-gray-400">
+                <%= item.id.slice(0, 8) %>...
+              </td>
+              <td class="px-5 py-4 font-bold text-white text-xs">
+                <%= item.products ? item.products.title : 'Unassigned Product' %>
+              </td>
+              <td class="px-5 py-4">
+                <% if (item.status === 'available') { %>
+                  <span class="px-2.5 py-0.5 text-[11px] font-bold rounded-full bg-emerald-950 text-emerald-400 border border-emerald-800">Available</span>
+                <% } else if (item.status === 'reserved') { %>
+                  <span class="px-2.5 py-0.5 text-[11px] font-bold rounded-full bg-amber-950 text-amber-400 border border-amber-800">Reserved</span>
+                <% } else if (item.status === 'sold') { %>
+                  <span class="px-2.5 py-0.5 text-[11px] font-bold rounded-full bg-gray-900 text-gray-400 border border-gray-700">Sold</span>
+                <% } else { %>
+                  <span class="px-2.5 py-0.5 text-[11px] font-bold rounded-full bg-red-950 text-red-400 border border-red-800">Disabled</span>
+                <% } %>
+              </td>
+              <td class="px-5 py-4 font-mono text-xs text-gray-400">
+                <%= item.reserved_order_id ? item.reserved_order_id.slice(0, 8) + '...' : '—' %>
+              </td>
+              <td class="px-5 py-4 text-xs text-gray-400">
+                <%= new Date(item.created_at).toLocaleString() %>
+              </td>
+              <td class="px-5 py-4 text-right space-x-2">
+                <% if (item.status === 'available') { %>
+                  <form action="/admin/inventory/accounts/<%= item.id %>/disable" method="POST" class="inline" onsubmit="return confirm('Disable this inventory item?')">
+                    <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                    <button type="submit" class="text-xs text-amber-500 hover:text-amber-400 font-semibold cursor-pointer">Disable</button>
+                  </form>
+                  <form action="/admin/inventory/accounts/<%= item.id %>/delete" method="POST" class="inline" onsubmit="return confirm('Permanently delete this account from stock?')">
+                    <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                    <button type="submit" class="text-xs text-red-500 hover:text-red-400 font-semibold cursor-pointer">Delete</button>
+                  </form>
+                <% } %>
+              </td>
+            </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- Add Account Modal -->
+<div id="newAccountModal" class="hidden fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+  <div class="bg-nightmare-dark border border-nightmare-border rounded-xl max-w-lg w-full p-6 shadow-2xl">
+    <div class="flex items-center justify-between pb-4 border-b border-nightmare-border">
+      <h3 class="text-lg font-bold text-white">Add Rockstar Account</h3>
+      <button onclick="document.getElementById('newAccountModal').classList.add('hidden')" class="text-gray-500 hover:text-white">&times;</button>
+    </div>
+
+    <form action="/admin/inventory/accounts" method="POST" class="mt-4 space-y-4">
+      <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+
+      <div>
+        <label class="block text-xs font-semibold text-gray-300 uppercase mb-1">Target Product</label>
+        <select name="product_id" required class="w-full px-3 py-2 bg-nightmare-card border border-nightmare-border rounded text-sm text-white">
+          <% products.forEach(p => { %>
+            <option value="<%= p.id %>"><%= p.title %> ($<%= p.price %>)</option>
+          <% }) %>
+        </select>
+      </div>
+
+      <div class="grid grid-cols-2 gap-4">
+        <div>
+          <label class="block text-xs font-semibold text-gray-300 uppercase mb-1">Rockstar Email / Login</label>
+          <input type="email" name="email" required placeholder="rockstar@example.com" class="w-full px-3 py-2 bg-nightmare-card border border-nightmare-border rounded text-sm text-white">
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-gray-300 uppercase mb-1">Account Password</label>
+          <input type="password" name="password" required placeholder="••••••••" class="w-full px-3 py-2 bg-nightmare-card border border-nightmare-border rounded text-sm text-white">
+        </div>
+      </div>
+
+      <div>
+        <label class="block text-xs font-semibold text-gray-300 uppercase mb-1">Mailbox Password (Optional)</label>
+        <input type="text" name="email_password" placeholder="Email access password if transferred" class="w-full px-3 py-2 bg-nightmare-card border border-nightmare-border rounded text-sm text-white">
+      </div>
+
+      <div>
+        <label class="block text-xs font-semibold text-gray-300 uppercase mb-1">Recovery Details / Notes</label>
+        <textarea name="recovery_info" rows="2" placeholder="Recovery codes, original email info, transfer instructions" class="w-full px-3 py-2 bg-nightmare-card border border-nightmare-border rounded text-sm text-white"></textarea>
+      </div>
+
+      <div class="flex justify-end space-x-3 pt-4 border-t border-nightmare-border">
+        <button type="button" onclick="document.getElementById('newAccountModal').classList.add('hidden')" class="px-4 py-2 bg-nightmare-card hover:bg-nightmare-border text-gray-300 text-xs font-semibold rounded">Cancel</button>
+        <button type="submit" class="px-4 py-2 bg-red-700 hover:bg-red-800 text-white text-xs font-bold rounded uppercase tracking-wider">Encrypt & Store</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<%- include('../layouts/footer') %>
