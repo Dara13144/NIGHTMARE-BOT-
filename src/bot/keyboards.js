@@ -4,33 +4,29 @@ import { t } from '../utils/telegram.js';
 export function getMainMenuKeyboard(lang = 'km', isAdmin = false) {
   const rows = [
     [
-      { text: t(lang, 'btn_shop'), callback_data: 'menu_products', style: 'success' },
-      { text: t(lang, 'btn_stock'), callback_data: 'menu_stock', style: 'success' }
+      { text: t(lang, 'btn_codes'), callback_data: 'menu_codes' },
+      { text: t(lang, 'btn_accounts'), callback_data: 'menu_accounts' }
     ],
     [
-      { text: t(lang, 'btn_codes'), callback_data: 'menu_codes', style: 'success' },
-      { text: t(lang, 'btn_accounts'), callback_data: 'menu_accounts', style: 'success' }
+      { text: t(lang, 'btn_wallet'), callback_data: 'menu_wallet' },
+      { text: t(lang, 'btn_orders'), callback_data: 'menu_orders' }
     ],
     [
-      { text: t(lang, 'btn_wallet'), callback_data: 'menu_wallet', style: 'success' },
-      { text: t(lang, 'btn_orders'), callback_data: 'menu_orders', style: 'success' }
+      { text: t(lang, 'btn_profile'), callback_data: 'menu_profile' },
+      { text: t(lang, 'btn_premium'), callback_data: 'menu_premium' }
     ],
     [
-      { text: t(lang, 'btn_profile'), callback_data: 'menu_profile', style: 'success' },
-      { text: t(lang, 'btn_premium'), callback_data: 'menu_premium', style: 'success' }
+      { text: t(lang, 'btn_promotions'), callback_data: 'menu_promotions' },
+      { text: t(lang, 'btn_support'), callback_data: 'menu_support' }
     ],
     [
-      { text: t(lang, 'btn_promotions'), callback_data: 'menu_promotions', style: 'success' },
-      { text: t(lang, 'btn_support'), callback_data: 'menu_support', style: 'success' }
-    ],
-    [
-      { text: t(lang, 'btn_language'), callback_data: 'menu_language', style: 'success' }
+      { text: t(lang, 'btn_language'), callback_data: 'menu_language' }
     ]
   ];
 
   if (isAdmin) {
     rows.push([
-      { text: '🛡️ Admin Dashboard', callback_data: 'menu_admin', style: 'danger' }
+      { text: '🛡️ Admin Dashboard', callback_data: 'menu_admin' }
     ]);
   }
 
@@ -60,8 +56,7 @@ export function getPersistentReplyKeyboard(lang = 'km', isAdmin = false) {
       { text: t(lang, 'btn_support') }
     ],
     [
-      { text: t(lang, 'btn_language') },
-      { text: t(lang, 'btn_main_menu') }
+      { text: t(lang, 'btn_language') }
     ]
   ];
 
