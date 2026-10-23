@@ -5,7 +5,6 @@ import { getMainMenuKeyboard, getLanguageKeyboard, getPersistentReplyKeyboard } 
 import { isAdmin } from './admin.js';
 import { t } from '../../utils/telegram.js';
 import { supabase } from '../../config/supabase.js';
-import { env } from '../../config/env.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -17,26 +16,18 @@ export async function handleStart(ctx) {
   const hasBanner = fs.existsSync(BANNER_FILE);
   const adminUser = isAdmin(ctx.from?.id);
 
-  // Guarantee native Telegram [Menu] button is active on bottom-left (Mini App if HTTPS, Commands if not)
+  // Guarantee native Telegram [Menu] button is active on bottom-left
   try {
-    const webAppUrl = (env.FRONTEND_URL || env.APP_BASE_URL || '').trim();
-    if (webAppUrl.startsWith('https://')) {
-      await ctx.setChatMenuButton({
-        type: 'web_app',
-        text: '🛍️ Store',
-        web_app: { url: webAppUrl }
-      });
-    } else {
-      await ctx.setChatMenuButton({ type: 'commands' });
-    }
+    await ctx.setChatMenuButton({ type: 'commands' });
   } catch {}
+
+  const inlineKb = getMainMenuKeyboard(lang, adminUser);
+  const replyKb = getPersistentReplyKeyboard(lang, adminUser);
 
   if (ctx.callbackQuery) {
     try {
       await ctx.answerCbQuery();
     } catch {}
-
-    const inlineKb = getMainMenuKeyboard(lang);
 
     // If previous message was a category photo, switch media back to main banner
     if (hasBanner) {
@@ -81,8 +72,12 @@ export async function handleStart(ctx) {
     }
   }
 
+  // When triggered via command (/start, /menu), ensure persistent menu buttons are active
+  try {
+    await ctx.reply(lang === 'km' ? '⚡ ម៉ឺនុយប្រព័ន្ធ NIGHTMARE STORE' : '⚡ NIGHTMARE STORE Menu System', replyKb);
+  } catch {}
+
   // Send banner photo with welcome caption and inline menu buttons
-  const inlineKb = getMainMenuKeyboard(lang);
   if (hasBanner) {
     try {
       return await ctx.replyWithPhoto({ source: BANNER_FILE }, {

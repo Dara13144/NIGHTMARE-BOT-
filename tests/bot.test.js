@@ -1,33 +1,8 @@
-import { describe, it, expect, beforeAll } from 'vitest';
+import { describe, it, expect } from 'vitest';
 import { escapeHtml, t, messages } from '../src/utils/telegram.js';
 import { getMainMenuKeyboard, getProductDetailKeyboard, getProductListKeyboard } from '../src/bot/keyboards.js';
 
 describe('Telegram Bot UI & Security', () => {
-  beforeAll(async () => {
-    const { supabase } = await import('../src/config/supabase.js');
-    await supabase.from('products').upsert([
-      {
-        id: 'prod-01',
-        title: 'Grand Theft Auto V — Premium Edition (PC Key)',
-        type: 'rockstar_code',
-        description: 'Complete GTAV story mode and Rockstar Launcher Activation Key.',
-        price: 14.99,
-        platform: 'PC / Rockstar Games Launcher',
-        region: 'Global',
-        is_active: true
-      },
-      {
-        id: 'prod-03',
-        title: 'Rockstar account',
-        type: 'rockstar_account',
-        description: 'Full access transferable account.',
-        price: 4.50,
-        platform: 'PC',
-        region: 'Global',
-        is_active: true
-      }
-    ], { onConflict: 'id' });
-  });
   it('safely escapes HTML in user-supplied strings to prevent markup injection', () => {
     const maliciousInput = '<script>alert("hack")</script> & <b>bold</b> "quotes"';
     const escaped = escapeHtml(maliciousInput);

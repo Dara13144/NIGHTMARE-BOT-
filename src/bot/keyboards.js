@@ -1,31 +1,23 @@
 import { Markup } from 'telegraf';
-import { env } from '../config/env.js';
 import { t } from '../utils/telegram.js';
 
-export function getMiniAppButton(lang = 'km') {
-  const url = (env.FRONTEND_URL || env.APP_BASE_URL || 'http://localhost:3000').trim();
-  const label = lang === 'km' ? '📱 ហាង Mini App' : '📱 Mini App Store';
-  if (url.startsWith('https://')) {
-    return { text: label, web_app: { url }, style: 'success' };
-  }
-  return { text: label, url, style: 'success' };
-}
-
-export function getMainMenuKeyboard(lang = 'km') {
-  return Markup.inlineKeyboard([
+export function getMainMenuKeyboard(lang = 'km', isAdmin = false) {
+  const rows = [
     [
-      getMiniAppButton(lang)
+      { text: t(lang, 'btn_shop'), callback_data: 'menu_products', style: 'success' },
+      { text: t(lang, 'btn_stock'), callback_data: 'menu_stock', style: 'success' }
     ],
     [
-      { text: t(lang, 'btn_accounts'), callback_data: 'menu_accounts', style: 'success' },
-      { text: t(lang, 'btn_codes'), callback_data: 'menu_codes', style: 'success' }
+      { text: t(lang, 'btn_codes'), callback_data: 'menu_codes', style: 'success' },
+      { text: t(lang, 'btn_accounts'), callback_data: 'menu_accounts', style: 'success' }
     ],
     [
-      { text: t(lang, 'btn_wallet'), callback_data: 'menu_wallet', style: 'success' }
+      { text: t(lang, 'btn_wallet'), callback_data: 'menu_wallet', style: 'success' },
+      { text: t(lang, 'btn_orders'), callback_data: 'menu_orders', style: 'success' }
     ],
     [
-      { text: t(lang, 'btn_orders'), callback_data: 'menu_orders', style: 'success' },
-      { text: t(lang, 'btn_profile'), callback_data: 'menu_profile', style: 'success' }
+      { text: t(lang, 'btn_profile'), callback_data: 'menu_profile', style: 'success' },
+      { text: t(lang, 'btn_premium'), callback_data: 'menu_premium', style: 'success' }
     ],
     [
       { text: t(lang, 'btn_promotions'), callback_data: 'menu_promotions', style: 'success' },
@@ -34,39 +26,47 @@ export function getMainMenuKeyboard(lang = 'km') {
     [
       { text: t(lang, 'btn_language'), callback_data: 'menu_language', style: 'success' }
     ]
-  ]);
+  ];
+
+  if (isAdmin) {
+    rows.push([
+      { text: '🛡️ Admin Dashboard', callback_data: 'menu_admin', style: 'danger' }
+    ]);
+  }
+
+  return Markup.inlineKeyboard(rows);
 }
 
 export function getPersistentReplyKeyboard(lang = 'km', isAdmin = false) {
-  const url = (env.FRONTEND_URL || env.APP_BASE_URL || '').trim();
-  const appLabel = lang === 'km' ? '📱 ហាង Mini App' : '📱 Mini App Store';
-
-  const rows = [];
-  if (url.startsWith('https://')) {
-    rows.push([Markup.button.webApp(appLabel, url)]);
-  } else {
-    rows.push([{ text: appLabel, style: 'success' }]);
-  }
-
-  rows.push(
+  const rows = [
     [
-      { text: t(lang, 'btn_accounts'), style: 'success' },
-      { text: t(lang, 'btn_codes'), style: 'success' }
+      { text: t(lang, 'btn_shop') },
+      { text: t(lang, 'btn_stock') }
     ],
     [
-      { text: t(lang, 'btn_wallet'), style: 'success' }
+      { text: t(lang, 'btn_codes') },
+      { text: t(lang, 'btn_accounts') }
     ],
     [
-      { text: t(lang, 'btn_orders'), style: 'success' },
-      { text: t(lang, 'btn_profile'), style: 'success' }
+      { text: t(lang, 'btn_wallet') },
+      { text: t(lang, 'btn_orders') }
     ],
     [
-      { text: t(lang, 'btn_support'), style: 'success' }
+      { text: t(lang, 'btn_profile') },
+      { text: t(lang, 'btn_premium') }
+    ],
+    [
+      { text: t(lang, 'btn_promotions') },
+      { text: t(lang, 'btn_support') }
+    ],
+    [
+      { text: t(lang, 'btn_language') },
+      { text: t(lang, 'btn_main_menu') }
     ]
-  );
+  ];
 
   if (isAdmin) {
-    rows.push([{ text: '🛡️ Admin Dashboard', style: 'danger' }]);
+    rows.push([{ text: '🛡️ Admin Dashboard' }]);
   }
 
   return Markup.keyboard(rows).resize();

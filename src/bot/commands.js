@@ -1,6 +1,5 @@
 import { env } from '../config/env.js';
 import { handleStart, handleLanguageMenu } from './handlers/start.js';
-import { handleMiniAppCommand } from './handlers/miniapp.js';
 import { handleCheckPaymentCommand } from './handlers/checkout.js';
 import { handleProducts, handleStockStatus } from './handlers/products.js';
 import { handleAccounts } from './handlers/accounts.js';
@@ -32,8 +31,7 @@ import { logger } from '../utils/logger.js';
 
 export function registerBotCommands(bot) {
   // 1. Slash Commands Registration
-  bot.command('start', handleStart);
-  bot.command(['app', 'miniapp', 'webapp', 'store'], handleMiniAppCommand);
+  bot.command(['start', 'menu', 'mainmenu', 'home'], handleStart);
   bot.command(['buy', 'shop', 'products'], async (ctx) => {
     const raw = ctx.message?.text?.trim() || '';
     const parts = raw.split(/\s+/);
@@ -74,48 +72,45 @@ export function registerBotCommands(bot) {
   bot.command('help', handleStart);
 
   // 2. Persistent System Menu Button Text Handlers (Khmer & English)
-  bot.hears([/.*(Mini App|Web App|ហាង Mini App)/i], handleMiniAppCommand);
-  bot.hears([/.*(Shop Products|ទិញទំនិញ|Buy|🏪|🟢 🏪)/i], (ctx) => handleProducts(ctx, 'all', 1));
-  bot.hears([/.*(Stock Status|ពិនិត្យស្តុក)/i], handleStockStatus);
-  bot.hears([/.*(Wallet|កាបូបលុយ|Add Balance|បញ្ចូលលុយ)/i], handleWalletMenu);
-  bot.hears([/.*(Rockstar Codes|Codes)/i], handleCodes);
-  bot.hears([/.*(Rockstar Accounts|Accounts)/i], handleAccounts);
-  bot.hears([/.*(My Orders|ការកុម្ម៉ង់របស់ខ្ញុំ|Orders)/i], handleOrders);
-  bot.hears([/.*(My Profile|ព័ត៌មានផ្ទាល់ខ្លួន|Profile)/i], handleProfile);
+  bot.hears([/.*(Shop Products|ទិញទំនិញ|Shop|Products|Buy|🏪|🟢 🏪)/i], (ctx) => handleProducts(ctx, 'all', 1));
+  bot.hears([/.*(Stock Status|ពិនិត្យស្តុក|Stock|ស្តុក)/i], handleStockStatus);
+  bot.hears([/.*(Wallet|កាបូបលុយ|Add Balance|បញ្ចូលលុយ|Balance|Topup)/i], handleWalletMenu);
+  bot.hears([/.*(Rockstar Codes|Codes|កូដ)/i], handleCodes);
+  bot.hears([/.*(Rockstar Accounts|Accounts|គណនី)/i], handleAccounts);
+  bot.hears([/.*(My Orders|ការកុម្ម៉ង់របស់ខ្ញុំ|Orders|Order)/i], handleOrders);
+  bot.hears([/.*(My Profile|ព័ត៌មានផ្ទាល់ខ្លួន|Profile|គណនីខ្ញុំ)/i], handleProfile);
   bot.hears([/.*(Premium Membership|សមាជិកភាព Premium|Premium|VIP|⭐|💎|👑)/i], handlePremium);
-  bot.hears([/.*(Promotions|ប្រូម៉ូសិន)/i], handlePromotions);
-  bot.hears([/.*(Contact Support|ផ្នែកបម្រើអតិថិជន|Support)/i], handleSupport);
+  bot.hears([/.*(Promotions|ប្រូម៉ូសិន|Promo|Discounts)/i], handlePromotions);
+  bot.hears([/.*(Contact Support|ផ្នែកបម្រើអតិថិជន|Support|Customer Service|Help)/i], handleSupport);
   bot.hears([/.*(Language|ភាសា)/i], handleLanguageMenu);
-  bot.hears([/.*(Main Menu|ម៉ឺនុយដើម)/i], handleStart);
-  bot.hears([/.*(Admin Dashboard|ផ្ទាំងគ្រប់គ្រង)/i], handleAdminDashboard);
+  bot.hears([/.*(Main Menu|ម៉ឺនុយដើម|Menu|🏠)/i], handleStart);
+  bot.hears([/.*(Admin Dashboard|ផ្ទាំងគ្រប់គ្រង|🛡️ Admin|Admin Panel)/i], handleAdminDashboard);
   bot.hears([/.*(Check Payment|ពិនិត្យការទូទាត់)/i], handleCheckPaymentCommand);
 
   // 3. Set official bot command list in Telegram menu
   bot.telegram.setMyCommands([
     { command: 'start', description: 'Start NIGHTMARE STORE' },
-    { command: 'app', description: '📱 Launch Telegram Mini App Store' },
+    { command: 'menu', description: 'Open interactive store menu' },
     { command: 'buy', description: '🏪 Browse & Buy Rockstar Products' },
-    { command: 'check', description: 'Check payment status of orders/top-ups' },
-    { command: 'wallet', description: 'Check balance & top-up wallet' },
     { command: 'codes', description: 'Rockstar activation codes' },
     { command: 'accounts', description: 'Rockstar transferable accounts' },
     { command: 'stock', description: 'Live stock status' },
-    { command: 'orders', description: 'Your order history' },
+    { command: 'wallet', description: 'Check balance & top-up wallet' },
+    { command: 'orders', description: 'Your order history & delivery credentials' },
     { command: 'profile', description: 'Your profile and VIP status' },
+    { command: 'premium', description: 'VIP membership & discounts' },
+    { command: 'promotions', description: 'Special discounts & promotions' },
+    { command: 'check', description: 'Check payment status of orders/top-ups' },
+    { command: 'support', description: 'Contact customer support' },
     { command: 'language', description: 'Switch language (Khmer/English)' },
-    { command: 'support', description: 'Contact customer support' }
+    { command: 'admin', description: 'Admin dashboard & stock editor' }
   ]).catch(err => {
     logger.warn({ err: err.message }, 'Could not set Telegram MyCommands list');
   });
 
-  // 4. Force native Telegram chat Menu button activation
-  const webAppUrl = (env.FRONTEND_URL || env.APP_BASE_URL || '').trim();
-  const menuButtonConfig = webAppUrl.startsWith('https://')
-    ? { type: 'web_app', text: '🛍️ Store', web_app: { url: webAppUrl } }
-    : { type: 'commands' };
-
+  // 4. Force native Telegram chat Menu button activation (Telegram Blue Menu Button)
   bot.telegram.setChatMenuButton({
-    menu_button: menuButtonConfig
+    menu_button: { type: 'commands' }
   }).catch(err => {
     logger.warn({ err: err.message }, 'Could not set Telegram ChatMenuButton');
   });
