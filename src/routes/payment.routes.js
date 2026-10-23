@@ -303,6 +303,17 @@ paymentRoutes.get('/status/:orderRef', async (req, res) => {
   });
 });
 
+// 3b. Live User Wallet Balance Endpoint (for Telegram Mini App & Storefront)
+paymentRoutes.get('/balance/:telegramId', async (req, res) => {
+  try {
+    const { telegramId } = req.params;
+    const balance = await WalletService.getBalance(telegramId);
+    return res.json({ success: true, telegramId: Number(telegramId), balance });
+  } catch (err) {
+    return res.status(500).json({ error: err.message });
+  }
+});
+
 // 4. Official server-to-server webhook notification callback for ABA PayWay
 paymentRoutes.post('/callback', paymentLimiter, async (req, res) => {
   try {

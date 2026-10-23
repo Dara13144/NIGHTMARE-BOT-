@@ -1,10 +1,65 @@
-// NIGHTMARE STORE — Storefront Interactive Engine & ABA KHQR Checkout
+// NIGHTMARE STORE — Storefront Interactive Engine & Telegram Mini App ABA KHQR Checkout
+let tgUser = null;
+
 document.addEventListener('DOMContentLoaded', () => {
+  initTelegramMiniApp();
   initProducts();
   initFilters();
   initModal();
   initStatusLookup();
 });
+
+function initTelegramMiniApp() {
+  const tg = window.Telegram?.WebApp;
+  if (!tg) return;
+
+  try {
+    tg.ready();
+    tg.expand();
+
+    tgUser = tg.initDataUnsafe?.user || null;
+
+    if (tgUser) {
+      const badge = document.getElementById('telegramUserBadge');
+      const nameEl = document.getElementById('telegramUserName');
+      const closeBtn = document.getElementById('closeWebAppBtn');
+      const botNavBtn = document.getElementById('botNavBtn');
+      const adminNavBtn = document.getElementById('adminNavBtn');
+
+      if (badge && nameEl) {
+        badge.style.display = 'inline-flex';
+        nameEl.textContent = tgUser.first_name || tgUser.username || `User #${tgUser.id}`;
+      }
+      if (closeBtn) closeBtn.style.display = 'inline-flex';
+      if (botNavBtn) botNavBtn.style.display = 'none';
+      if (adminNavBtn && String(tgUser.id) !== '8361673413') {
+        adminNavBtn.style.display = 'none';
+      }
+
+      fetchUserBalance(tgUser.id);
+    }
+  } catch (err) {
+    console.warn('Telegram Mini App init warning:', err);
+  }
+}
+
+async function fetchUserBalance(telegramId) {
+  try {
+    const res = await fetch(`/payments/balance/${telegramId}`);
+    if (res.ok) {
+      const data = await res.json();
+      const balEl = document.getElementById('telegramUserBalance');
+      if (balEl && typeof data.balance === 'number') {
+        balEl.textContent = `$${data.balance.toFixed(2)}`;
+      }
+    }
+  } catch {}
+}
+
+function getTelegramUserId() {
+  return tgUser?.id || null;
+}
+
 
 let allProducts = [];
 let currentFilter = 'all';
@@ -166,10 +221,14 @@ window.openCheckoutModal = async function(productId) {
   overlay.classList.add('active');
 
   try {
+    const payload = { productId: product.id };
+    const uid = getTelegramUserId();
+    if (uid) payload.telegramId = uid;
+
     const res = await fetch('/payments/create-session', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ productId: product.id })
+      body: JSON.stringify(payload)
     });
     const session = await res.json();
 
@@ -260,10 +319,14 @@ window.generateTopupKhqr = async function() {
   `;
 
   try {
+    const payload = { type: 'topup', amount };
+    const uid = getTelegramUserId();
+    if (uid) payload.telegramId = uid;
+
     const res = await fetch('/payments/create-session', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ type: 'topup', amount })
+      body: JSON.stringify(payload)
     });
     const session = await res.json();
 
@@ -366,7 +429,17 @@ function renderSuccessScreen(ref) {
 
   if (title) title.innerHTML = `<span>🎉</span> <span>Payment Confirmed!</span>`;
 
-  body.innerHTML = `
+    if (window.Telegram?.WebApp?.HapticFeedback) {
+      try {
+        window.Telegram.WebApp.HapticFeedback.notificationOccurred('success');
+      } catch {}
+    }
+
+    if (tgUser) {
+      fetchUserBalance(tgUser.id);
+    }
+
+    body.innerHTML = `
     <div style="text-align: center; padding: 1.5rem 1rem;">
       <div style="width: 64px; height: 64px; background: rgba(16, 185, 129, 0.15); border: 2px solid var(--emerald); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 1.25rem; font-size: 2rem;">
         ✅
@@ -387,9 +460,15 @@ function renderSuccessScreen(ref) {
       </div>
 
       <div style="display: flex; flex-direction: column; gap: 0.6rem;">
-        <a href="https://t.me/darastore_bot" class="btn btn-primary" style="width: 100%;">
-          <span>Open Telegram Chat (@darastore_bot)</span>
-        </a>
+        ${window.Telegram?.WebApp ? `
+          <button class="btn btn-primary" onclick="window.Telegram.WebApp.close()" style="width: 100%;">
+            <span>💬 View in Telegram Chat</span>
+          </button>
+        ` : `
+          <a href="https://t.me/darastore_bot" class="btn btn-primary" style="width: 100%;">
+            <span>Open Telegram Chat (@darastore_bot)</span>
+          </a>
+        `}
         <button class="btn btn-secondary" onclick="closeModal()">Close</button>
       </div>
     </div>

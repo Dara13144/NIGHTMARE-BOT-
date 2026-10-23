@@ -39,16 +39,20 @@ async function bootstrap() {
       const launchBotPolling = async (attempt = 1) => {
         if (isShuttingDown) return;
         try {
+          try {
+            bot.stop();
+          } catch {}
           await bot.telegram.deleteWebhook({ drop_pending_updates: true });
           logger.info({ attempt }, '🤖 Launching NIGHTMARE STORE Telegram Bot polling...');
           await bot.launch({ dropPendingUpdates: true });
           logger.info('🤖 NIGHTMARE STORE Telegram Bot is LIVE and listening for updates');
         } catch (err) {
-          logger.warn({ err: err.message, attempt }, 'Telegram bot polling interrupted or conflict encountered. Reconnecting in 3s...');
+          const delay = Math.min(30000, 3000 * Math.min(attempt, 5));
+          logger.warn({ err: err.message, attempt, nextRetrySeconds: delay / 1000 }, 'Telegram bot polling interrupted or conflict encountered.');
           if (!isShuttingDown) {
             reconnectTimeout = setTimeout(() => {
               launchBotPolling(attempt + 1);
-            }, 3000);
+            }, delay);
           }
         }
       };

@@ -33,20 +33,22 @@ export function createApp(bot) {
   // 3. Static Files
   app.use(express.static(path.join(__dirname, '..', 'public')));
 
-  // 4. Security Headers (Helmet)
+  // 4. Security Headers (Helmet configured for Telegram Mini App iframe embedding)
   app.use(
     helmet({
       contentSecurityPolicy: {
         directives: {
           defaultSrc: ["'self'"],
-          scriptSrc: ["'self'", "'unsafe-inline'", 'https://cdn.tailwindcss.com'],
+          scriptSrc: ["'self'", "'unsafe-inline'", 'https://cdn.tailwindcss.com', 'https://telegram.org'],
           styleSrc: ["'self'", "'unsafe-inline'", 'https://cdn.tailwindcss.com', 'https://fonts.googleapis.com'],
           fontSrc: ["'self'", 'https://fonts.gstatic.com'],
           imgSrc: ["'self'", 'data:', 'blob:', 'https:', 'http:'],
-          connectSrc: ["'self'", 'https:', 'http:']
+          connectSrc: ["'self'", 'https:', 'http:'],
+          frameAncestors: ["'self'", 'https://web.telegram.org', 'https://*.telegram.org']
         }
       },
-      crossOriginEmbedderPolicy: false
+      crossOriginEmbedderPolicy: false,
+      frameguard: false
     })
   );
 

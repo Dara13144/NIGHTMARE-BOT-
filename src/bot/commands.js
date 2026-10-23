@@ -1,5 +1,6 @@
 import { env } from '../config/env.js';
 import { handleStart, handleLanguageMenu } from './handlers/start.js';
+import { handleMiniAppCommand } from './handlers/miniapp.js';
 import { handleCheckPaymentCommand } from './handlers/checkout.js';
 import { handleProducts, handleStockStatus } from './handlers/products.js';
 import { handleAccounts } from './handlers/accounts.js';
@@ -32,6 +33,7 @@ import { logger } from '../utils/logger.js';
 export function registerBotCommands(bot) {
   // 1. Slash Commands Registration
   bot.command('start', handleStart);
+  bot.command(['app', 'miniapp', 'webapp', 'store'], handleMiniAppCommand);
   bot.command(['buy', 'shop', 'products'], async (ctx) => {
     const raw = ctx.message?.text?.trim() || '';
     const parts = raw.split(/\s+/);
@@ -72,6 +74,7 @@ export function registerBotCommands(bot) {
   bot.command('help', handleStart);
 
   // 2. Persistent System Menu Button Text Handlers (Khmer & English)
+  bot.hears([/.*(Mini App|Web App|ហាង Mini App)/i], handleMiniAppCommand);
   bot.hears([/.*(Shop Products|ទិញទំនិញ|Buy|🏪|🟢 🏪)/i], (ctx) => handleProducts(ctx, 'all', 1));
   bot.hears([/.*(Stock Status|ពិនិត្យស្តុក)/i], handleStockStatus);
   bot.hears([/.*(Wallet|កាបូបលុយ|Add Balance|បញ្ចូលលុយ)/i], handleWalletMenu);
@@ -90,6 +93,7 @@ export function registerBotCommands(bot) {
   // 3. Set official bot command list in Telegram menu
   bot.telegram.setMyCommands([
     { command: 'start', description: 'Start NIGHTMARE STORE' },
+    { command: 'app', description: '📱 Launch Telegram Mini App Store' },
     { command: 'buy', description: '🏪 Browse & Buy Rockstar Products' },
     { command: 'check', description: 'Check payment status of orders/top-ups' },
     { command: 'wallet', description: 'Check balance & top-up wallet' },
@@ -104,9 +108,14 @@ export function registerBotCommands(bot) {
     logger.warn({ err: err.message }, 'Could not set Telegram MyCommands list');
   });
 
-  // 4. Force native Telegram chat Menu button activation (Telegram Blue Menu Button)
+  // 4. Force native Telegram chat Menu button activation
+  const webAppUrl = (env.FRONTEND_URL || env.APP_BASE_URL || '').trim();
+  const menuButtonConfig = webAppUrl.startsWith('https://')
+    ? { type: 'web_app', text: '🛍️ Store', web_app: { url: webAppUrl } }
+    : { type: 'commands' };
+
   bot.telegram.setChatMenuButton({
-    menu_button: { type: 'commands' }
+    menu_button: menuButtonConfig
   }).catch(err => {
     logger.warn({ err: err.message }, 'Could not set Telegram ChatMenuButton');
   });

@@ -5,6 +5,7 @@ import { getMainMenuKeyboard, getLanguageKeyboard, getPersistentReplyKeyboard } 
 import { isAdmin } from './admin.js';
 import { t } from '../../utils/telegram.js';
 import { supabase } from '../../config/supabase.js';
+import { env } from '../../config/env.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -16,9 +17,18 @@ export async function handleStart(ctx) {
   const hasBanner = fs.existsSync(BANNER_FILE);
   const adminUser = isAdmin(ctx.from?.id);
 
-  // Guarantee native Telegram [Menu] button is active on bottom-left
+  // Guarantee native Telegram [Menu] button is active on bottom-left (Mini App if HTTPS, Commands if not)
   try {
-    await ctx.setChatMenuButton({ type: 'commands' });
+    const webAppUrl = (env.FRONTEND_URL || env.APP_BASE_URL || '').trim();
+    if (webAppUrl.startsWith('https://')) {
+      await ctx.setChatMenuButton({
+        type: 'web_app',
+        text: '🛍️ Store',
+        web_app: { url: webAppUrl }
+      });
+    } else {
+      await ctx.setChatMenuButton({ type: 'commands' });
+    }
   } catch {}
 
   if (ctx.callbackQuery) {

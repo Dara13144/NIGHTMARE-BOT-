@@ -1,8 +1,21 @@
 import { Markup } from 'telegraf';
+import { env } from '../config/env.js';
 import { t } from '../utils/telegram.js';
+
+export function getMiniAppButton(lang = 'km') {
+  const url = (env.FRONTEND_URL || env.APP_BASE_URL || 'http://localhost:3000').trim();
+  const label = lang === 'km' ? '📱 ហាង Mini App' : '📱 Mini App Store';
+  if (url.startsWith('https://')) {
+    return { text: label, web_app: { url }, style: 'success' };
+  }
+  return { text: label, url, style: 'success' };
+}
 
 export function getMainMenuKeyboard(lang = 'km') {
   return Markup.inlineKeyboard([
+    [
+      getMiniAppButton(lang)
+    ],
     [
       { text: t(lang, 'btn_accounts'), callback_data: 'menu_accounts', style: 'success' },
       { text: t(lang, 'btn_codes'), callback_data: 'menu_codes', style: 'success' }
@@ -25,7 +38,17 @@ export function getMainMenuKeyboard(lang = 'km') {
 }
 
 export function getPersistentReplyKeyboard(lang = 'km', isAdmin = false) {
-  const rows = [
+  const url = (env.FRONTEND_URL || env.APP_BASE_URL || '').trim();
+  const appLabel = lang === 'km' ? '📱 ហាង Mini App' : '📱 Mini App Store';
+
+  const rows = [];
+  if (url.startsWith('https://')) {
+    rows.push([Markup.button.webApp(appLabel, url)]);
+  } else {
+    rows.push([{ text: appLabel, style: 'success' }]);
+  }
+
+  rows.push(
     [
       { text: t(lang, 'btn_accounts'), style: 'success' },
       { text: t(lang, 'btn_codes'), style: 'success' }
@@ -40,7 +63,7 @@ export function getPersistentReplyKeyboard(lang = 'km', isAdmin = false) {
     [
       { text: t(lang, 'btn_support'), style: 'success' }
     ]
-  ];
+  );
 
   if (isAdmin) {
     rows.push([{ text: '🛡️ Admin Dashboard', style: 'danger' }]);
