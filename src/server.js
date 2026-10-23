@@ -18,41 +18,41 @@ async function bootstrap() {
   const server = app.listen(env.PORT, async () => {
     logger.info(`🚀 NIGHTMARE STORE Server running at http://localhost:${env.PORT}`);
 
-    // Setup Bot Launch (Webhook in Production, Polling in Local Development)
-    const isProd = env.NODE_ENV === 'production' || (env.APP_BASE_URL && env.APP_BASE_URL.startsWith('https://'));
+    // Setup Bot Launch: Webhook or Polling mode
+    const useWebhook = (process.env.BOT_MODE === 'webhook' || (env.NODE_ENV === 'production' && process.env.BOT_MODE !== 'polling')) 
+      && env.APP_BASE_URL 
+      && env.APP_BASE_URL.startsWith('https://');
 
     let isShuttingDown = false;
     let reconnectTimeout = null;
 
-    if (isProd) {
+    if (useWebhook) {
       try {
         const webhookUrl = `${env.APP_BASE_URL}/webhook/telegram`;
         await bot.telegram.setWebhook(webhookUrl, {
           secret_token: env.TELEGRAM_WEBHOOK_SECRET
         });
-        logger.info({ webhookUrl }, 'Telegram webhook registered successfully');
+        logger.info({ webhookUrl }, 'Telegram webhook registered successfully (Production Webhook Mode)');
       } catch (err) {
         logger.error({ err: err.message }, 'Failed to set Telegram webhook in production mode');
       }
     } else {
-      // Local development polling with auto-reconnect engine
+      // Long Polling Mode with Auto-reconnection (Ideal for Render Web Services & Background Workers)
       const launchBotPolling = async (attempt = 1) => {
         if (isShuttingDown) return;
         try {
-          try {
-            bot.stop();
-          } catch {}
+          try { bot.stop('reconnect'); } catch {}
           await bot.telegram.deleteWebhook({ drop_pending_updates: true });
           logger.info({ attempt }, '🤖 Launching NIGHTMARE STORE Telegram Bot polling...');
           await bot.launch({ dropPendingUpdates: true });
           logger.info('🤖 NIGHTMARE STORE Telegram Bot is LIVE and listening for updates');
         } catch (err) {
-          const delay = Math.min(30000, 3000 * Math.min(attempt, 5));
-          logger.warn({ err: err.message, attempt, nextRetrySeconds: delay / 1000 }, 'Telegram bot polling interrupted or conflict encountered.');
+          const retryDelay = Math.min(attempt * 3000, 15000);
+          logger.warn({ err: err.message, attempt, nextRetrySeconds: retryDelay / 1000 }, 'Telegram bot polling interrupted or conflict encountered.');
           if (!isShuttingDown) {
             reconnectTimeout = setTimeout(() => {
               launchBotPolling(attempt + 1);
-            }, delay);
+            }, retryDelay);
           }
         }
       };
